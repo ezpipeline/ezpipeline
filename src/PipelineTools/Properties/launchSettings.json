@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PipelineTools": {
+      "commandName": "Project",
+      "commandLineArgs": "winsdkenv"
+    }
+  }
+}
