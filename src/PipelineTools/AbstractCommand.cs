@@ -23,7 +23,7 @@ public abstract class AbstractCommand<TOptions>
             if (attr != null) Command.AddOption(attr.MakeOption(propertyInfo));
         }
 
-        Command.SetHandler(OnHandleCommand);
+        Command.SetHandler(OnHandleCommandAsync);
     }
 
     public Command Command { get; }
@@ -38,7 +38,7 @@ public abstract class AbstractCommand<TOptions>
         };
     }
 
-    public abstract void HandleCommand(TOptions options);
+    public abstract Task HandleCommandAsync(TOptions options);
 
     protected void SetEnvironmentVariable(string envName, string value)
     {
@@ -123,10 +123,10 @@ public abstract class AbstractCommand<TOptions>
         return output.ToString();
     }
 
-    private void OnHandleCommand(InvocationContext invocationContext)
+    private async Task OnHandleCommandAsync(InvocationContext invocationContext)
     {
         _invocationContext = invocationContext;
-        HandleCommand((TOptions)new ModelBinder<TOptions>().CreateInstance(invocationContext.BindingContext));
+        await HandleCommandAsync((TOptions)new ModelBinder<TOptions>().CreateInstance(invocationContext.BindingContext));
         if (_invocationContext == invocationContext)
             _invocationContext = null;
     }

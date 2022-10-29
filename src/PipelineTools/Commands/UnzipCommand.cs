@@ -11,7 +11,7 @@ public class UnzipCommand : AbstractCommand<UnzipOptions>
     {
     }
 
-    public override void HandleCommand(UnzipOptions options)
+    public override async Task HandleCommandAsync(UnzipOptions options)
     {
         var di = new DirectoryInfo(Path.GetFullPath(options.Output));
         Regex? filter = null;

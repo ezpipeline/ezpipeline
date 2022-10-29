@@ -10,7 +10,7 @@ public class WindowsSdkEnvironmentCommand : AbstractCommand<WindowsSdkEnvironmen
     {
     }
 
-    public override void HandleCommand(WindowsSdkEnvironmentOptions options)
+    public override async Task HandleCommandAsync(WindowsSdkEnvironmentOptions options)
     {
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
         {

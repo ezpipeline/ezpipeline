@@ -10,7 +10,7 @@ public class VisualStudioEnvironmentCommand : AbstractCommand<VisualStudioEnviro
     {
     }
 
-    public override void HandleCommand(VisualStudioEnvironmentOptions options)
+    public override async Task HandleCommandAsync(VisualStudioEnvironmentOptions options)
     {
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
         {

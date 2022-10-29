@@ -9,7 +9,7 @@ public class GetNumberOfProcessorsCommand : AbstractCommand<GetNumberOfProcessor
     {
     }
 
-    public override void HandleCommand(GetNumberOfProcessorsOptions invocationContext)
+    public override async Task HandleCommandAsync(GetNumberOfProcessorsOptions invocationContext)
     {
         Console.WriteLine(Environment.ProcessorCount);
     }

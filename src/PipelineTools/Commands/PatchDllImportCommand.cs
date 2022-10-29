@@ -20,7 +20,7 @@ public class PatchDllImportCommand : AbstractCommand<PatchDllImportCommand.Patch
     {
     }
 
-    public override void HandleCommand(PatchDllImportOptions options)
+    public override async Task HandleCommandAsync(PatchDllImportOptions options)
     {
         var fileName = options.Input;
         if (string.IsNullOrWhiteSpace(options.Input)) throw new ArgumentException("Missing --input argument");

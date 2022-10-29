@@ -6,7 +6,7 @@ namespace PipelineTools;
 
 public static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var rootCommand = new RootCommand();
         rootCommand.Add(new VisualStudioEnvironmentCommand().Command);
@@ -16,6 +16,6 @@ public static class Program
         rootCommand.Add(new GetNumberOfProcessorsCommand().Command);
         rootCommand.Add(new ZipCommand().Command);
         rootCommand.Add(new UnzipCommand().Command);
-        rootCommand.Parse(args).Invoke();
+        await rootCommand.Parse(args).InvokeAsync();
     }
 }
