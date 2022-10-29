@@ -1,42 +1,45 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Binding;
 using System.CommandLine.Invocation;
+using System.CommandLine.NamingConventionBinder;
 using System.CommandLine.Parsing;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text;
-using System.Xml;
 
 namespace PipelineTools;
 
-public abstract class AbstractCommand
+public abstract class AbstractCommand<TOptions>
 {
-    private Command _command;
-
-    public Command Command => _command;
+    private InvocationContext? _invocationContext;
 
     public AbstractCommand(string command, string description = null)
     {
-        _command = new Command(command, description);
-        _command.SetHandler(HandleCommand);
+        Command = new Command(command, description);
+        var props = typeof(TOptions).GetProperties();
+        foreach (var propertyInfo in props)
+        {
+            var attr = propertyInfo.GetCustomAttribute<CommandLineOptionAttribute>();
+            if (attr != null) Command.AddOption(attr.MakeOption(propertyInfo));
+        }
+
+        Command.SetHandler(OnHandleCommand);
     }
 
-    public abstract void HandleCommand(InvocationContext invocationContext);
+    public Command Command { get; }
 
-    protected static T? GetValueForHandlerParameter<T>(
-        IValueDescriptor<T> symbol,
-        InvocationContext context)
+    internal static T? GetValueFor<T>(ParseResult res, IValueDescriptor<T> symbol)
     {
-        if (symbol is IValueSource valueSource &&
-            valueSource.TryGetValue(symbol, context.BindingContext, out var boundValue) &&
-            boundValue is T value)
+        return symbol switch
         {
-            return value;
-        }
-        else
-        {
-            return GetValueFor(context.ParseResult, symbol);
-        }
+            Argument<T> argument => res.GetValueForArgument(argument),
+            Option<T> option => res.GetValueForOption(option),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
+
+    public abstract void HandleCommand(TOptions options);
+
     protected void SetEnvironmentVariable(string envName, string value)
     {
         Console.WriteLine($"Seting environment variable {envName} to {value}");
@@ -54,7 +57,6 @@ public abstract class AbstractCommand
         var combinedPaths = new List<string>();
 
         foreach (var s in value.Split(Path.PathSeparator).Where(_ => !string.IsNullOrWhiteSpace(_)))
-        {
             if (!Directory.Exists(s))
             {
                 Console.Error.WriteLine($"Path not found: \"{s}\"");
@@ -64,18 +66,14 @@ public abstract class AbstractCommand
                 combinedPaths.Add(s);
                 Console.WriteLine($"{envName}: Adding path \"{s}\"");
             }
-        }
+
         if (!string.IsNullOrWhiteSpace(existingValue))
-        {
-            foreach (var s in existingValue.Split(Path.PathSeparator).Where(_=>!string.IsNullOrWhiteSpace(_)))
-            {
+            foreach (var s in existingValue.Split(Path.PathSeparator).Where(_ => !string.IsNullOrWhiteSpace(_)))
                 if (visitedPath.Add(s))
                 {
                     combinedPaths.Add(s);
                     Console.WriteLine($"{envName}: Existing path \"{s}\"");
                 }
-            }
-        }
 
         var newValue = string.Join(Path.PathSeparator, combinedPaths);
         Environment.SetEnvironmentVariable(envName, newValue, EnvironmentVariableTarget.Process);
@@ -84,24 +82,21 @@ public abstract class AbstractCommand
 
     protected string RunProcess(string fileName, string args)
     {
-        var processStartInfo = new ProcessStartInfo(fileName) {Arguments = args};
+        var processStartInfo = new ProcessStartInfo(fileName) { Arguments = args };
         return RunProcess(processStartInfo);
     }
 
     protected string RunProcess(string fileName, params string[] args)
     {
         var processStartInfo = new ProcessStartInfo(fileName);
-        foreach (var s in args)
-        {
-            processStartInfo.ArgumentList.Add(s);
-        }
+        foreach (var s in args) processStartInfo.ArgumentList.Add(s);
         return RunProcess(processStartInfo);
     }
 
     protected string RunProcess(ProcessStartInfo info)
     {
         var output = new StringBuilder(1024);
-        
+
         var process = Process.Start(info);
         info.UseShellExecute = false;
         info.RedirectStandardError = true;
@@ -116,6 +111,7 @@ public abstract class AbstractCommand
                 output.Append(str);
             }
         }
+
         process.ErrorDataReceived += OnProcessOnDataReceived;
         process.OutputDataReceived += OnProcessOnDataReceived;
         process.EnableRaisingEvents = true;
@@ -127,11 +123,11 @@ public abstract class AbstractCommand
         return output.ToString();
     }
 
-    internal static T? GetValueFor<T>(ParseResult res, IValueDescriptor<T> symbol) =>
-        symbol switch
-        {
-            Argument<T> argument => res.GetValueForArgument(argument),
-            Option<T> option => res.GetValueForOption(option),
-            _ => throw new ArgumentOutOfRangeException()
-        };
+    private void OnHandleCommand(InvocationContext invocationContext)
+    {
+        _invocationContext = invocationContext;
+        HandleCommand((TOptions)new ModelBinder<TOptions>().CreateInstance(invocationContext.BindingContext));
+        if (_invocationContext == invocationContext)
+            _invocationContext = null;
+    }
 }

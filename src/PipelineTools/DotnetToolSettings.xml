@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+
 <DotNetCliTool Version="1">
-  <Commands>
-    <Command Name="azurepipelinetool" EntryPoint="azurepipelinetool.dll" Runner="dotnet" />
-  </Commands>
+	<Commands>
+		<Command Name="azurepipelinetool" EntryPoint="azurepipelinetool.dll" Runner="dotnet" />
+	</Commands>
 </DotNetCliTool>

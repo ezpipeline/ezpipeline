@@ -2,7 +2,7 @@
   "profiles": {
     "PipelineTools": {
       "commandName": "Project",
-      "commandLineArgs": "winsdkenv"
+      "commandLineArgs": "unzip -o C:\\Temp\\2222\\ -i C:\\Temp\\222.zip -f Sp"
     }
   }
 }
