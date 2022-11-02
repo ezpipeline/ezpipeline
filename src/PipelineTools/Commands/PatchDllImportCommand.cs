@@ -5,22 +5,11 @@ namespace AzurePipelineTool.Commands;
 
 public class PatchDllImportCommand : AbstractCommand<PatchDllImportCommand.PatchDllImportOptions>
 {
-    public class PatchDllImportOptions
-    {
-        [CommandLineOption("-i", "Input assembly")]
-        public string Input { get; set; }
-
-        [CommandLineOption("-o", "Output assembly")]
-        public string Output { get; set; }
-
-        [CommandLineOption("-v", "New value")] public string NewValue { get; set; }
-    }
-
-    public PatchDllImportCommand() : base("patchdllimport")
+    public PatchDllImportCommand() : base("patch-dllimport")
     {
     }
 
-    public override async Task HandleCommandAsync(PatchDllImportOptions options)
+    public override async Task HandleCommandAsync(PatchDllImportOptions options, CancellationToken cancellationToken)
     {
         var fileName = options.Input;
         if (string.IsNullOrWhiteSpace(options.Input)) throw new ArgumentException("Missing --input argument");
@@ -38,5 +27,16 @@ public class PatchDllImportCommand : AbstractCommand<PatchDllImportCommand.Patch
             }
 
         assembly.Write(options.Output);
+    }
+
+    public class PatchDllImportOptions
+    {
+        [CommandLineOption("-i", "Input assembly")]
+        public string Input { get; set; }
+
+        [CommandLineOption("-o", "Output assembly")]
+        public string Output { get; set; }
+
+        [CommandLineOption("-v", "New value")] public string NewValue { get; set; }
     }
 }

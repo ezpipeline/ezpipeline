@@ -10,18 +10,6 @@ public class ZipCommand : AbstractCommand<ZipCommand.ZipOptions>
     {
     }
 
-    public override async Task HandleCommandAsync(ZipOptions options)
-    {
-        var input = options.Input;
-        var filterPattern = options.Filter;
-        var compressionLevel = options.CompressionLevel;
-
-        using (var fileStream = PipelineUtils.CreateFile(options.Output))
-        {
-            DoZip(fileStream, input, filterPattern, compressionLevel);
-        }
-    }
-
     public static void DoZip(Stream fileStream, string input, string filterPattern, CompressionLevel compressionLevel)
     {
         //if ((i.Attributes & FileAttributes.Directory) != 0)
@@ -72,6 +60,18 @@ public class ZipCommand : AbstractCommand<ZipCommand.ZipOptions>
         if (end <= start)
             return string.Empty;
         return fileFullName.Substring(start, end - start).Replace('\"', '/');
+    }
+
+    public override async Task HandleCommandAsync(ZipOptions options, CancellationToken cancellationToken)
+    {
+        var input = options.Input;
+        var filterPattern = options.Filter;
+        var compressionLevel = options.CompressionLevel;
+
+        using (var fileStream = PipelineUtils.CreateFile(options.Output))
+        {
+            DoZip(fileStream, input, filterPattern, compressionLevel);
+        }
     }
 
     public class ZipOptions

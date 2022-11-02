@@ -1,0 +1,46 @@
+﻿using System.Globalization;
+using PipelineTools;
+using static AzurePipelineTool.Commands.GetCPUInfoCommand;
+
+namespace AzurePipelineTool.Commands;
+
+public class GetCPUInfoCommand : AbstractCommand<GetNumberOfProcessorsOptions>
+{
+    public GetCPUInfoCommand() : base("cpu-info")
+    {
+    }
+
+    public override async Task HandleCommandAsync(GetNumberOfProcessorsOptions options, CancellationToken cancellationToken)
+    {
+        string result = "";
+        switch (options.Info)
+        {
+            case CpuInfo.Count:
+                result = Environment.ProcessorCount.ToString(CultureInfo.InvariantCulture);
+                break;
+            case CpuInfo.Arch:
+                Console.WriteLine(System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture);
+                break;
+        }
+        Console.WriteLine(result);
+        if (!string.IsNullOrWhiteSpace(options.Variable))
+        {
+            PipelineUtils.SetEnvironmentVariable(options.Variable, result);
+        }
+    }
+
+    public class GetNumberOfProcessorsOptions
+    {
+        [CommandLineOption("-i", "CPU property")]
+        public CpuInfo Info { get; set; }
+
+        [CommandLineOption("-v", "Environment variable to set")]
+        public string? Variable { get; set; }
+    }
+
+    public enum CpuInfo
+    {
+        Count,
+        Arch,
+    }
+}

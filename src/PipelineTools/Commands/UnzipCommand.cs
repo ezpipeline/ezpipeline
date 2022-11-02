@@ -11,38 +11,60 @@ public class UnzipCommand : AbstractCommand<UnzipOptions>
     {
     }
 
-    public override async Task HandleCommandAsync(UnzipOptions options)
+    public static void DoUnzip(Stream fileStream, string optionsOutput, string? optionsFilter, bool overwrite, string? rootPath, CancellationToken cancellationToken)
     {
-        var di = new DirectoryInfo(Path.GetFullPath(options.Output));
+        var di = new DirectoryInfo(Path.GetFullPath(optionsOutput));
         Regex? filter = null;
-        if (!string.IsNullOrWhiteSpace(options.Filter)) filter = new Regex(options.Filter, RegexOptions.Compiled);
+        if (!string.IsNullOrWhiteSpace(optionsFilter)) filter = new Regex(optionsFilter, RegexOptions.Compiled);
 
-        using (var fileStream = PipelineUtils.OpenFile(options.Input))
+        if (string.IsNullOrWhiteSpace(rootPath))
         {
-            using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Read, false))
+            rootPath = null;
+        }
+        else
+        {
+            rootPath = rootPath.Replace("\\", "/").TrimEnd('/')+'/';
+        }
+
+        using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Read, false))
+        {
+            foreach (var entry in archive.Entries)
             {
-                foreach (var entry in archive.Entries)
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+                var entryFullName = entry.FullName;
+
+
+                if (rootPath != null && entryFullName.StartsWith(rootPath))
                 {
-                    if (filter != null && !filter.IsMatch(entry.FullName))
-                    {
+                    if (entryFullName.Length == rootPath.Length)
                         continue;
-                    }
-                    var fileDestinationPath = Path.GetFullPath(Path.Combine(di.FullName, entry.FullName));
-                    var fileName = Path.GetFileName(fileDestinationPath);
-                    if (fileName.Length == 0)
+                    entryFullName = entryFullName.Substring(rootPath.Length);
+                }
+                if (filter != null && !filter.IsMatch(entryFullName)) continue;
+                var fileDestinationPath = Path.GetFullPath(Path.Combine(di.FullName, entryFullName));
+                var fileName = Path.GetFileName(fileDestinationPath);
+                if (fileName.Length == 0)
+                {
+                    Directory.CreateDirectory(fileDestinationPath);
+                }
+                else
+                {
+                    if (overwrite || !File.Exists(fileDestinationPath))
                     {
-                        Directory.CreateDirectory(fileDestinationPath);
-                    }
-                    else
-                    {
-                        if (options.Overwrite || !File.Exists(fileDestinationPath))
-                        {
-                            Directory.CreateDirectory(Path.GetDirectoryName(fileDestinationPath));
-                            entry.ExtractToFile(fileDestinationPath, options.Overwrite);
-                        }
+                        Directory.CreateDirectory(Path.GetDirectoryName(fileDestinationPath));
+                        entry.ExtractToFile(fileDestinationPath, overwrite);
                     }
                 }
             }
+        }
+    }
+
+    public override async Task HandleCommandAsync(UnzipOptions options, CancellationToken cancellationToken)
+    {
+        using (var fileStream = PipelineUtils.OpenFile(options.Input))
+        {
+            DoUnzip(fileStream, options.Output, options.Filter, options.Overwrite, options.RootPath, cancellationToken);
         }
     }
 
@@ -52,12 +74,15 @@ public class UnzipCommand : AbstractCommand<UnzipOptions>
         public string Input { get; set; }
 
         [CommandLineOption("-f", "Filter regex")]
-        public string Filter { get; set; }
+        public string? Filter { get; set; }
 
         [CommandLineOption("-o", "Output folder")]
-        public string Output { get; set; }
+        public string Output { get; set; } = Directory.GetCurrentDirectory();
 
         [CommandLineOption(description: "Overwrite files")]
         public bool Overwrite { get; set; }
+
+        [CommandLineOption("-r", "Root path to skip")]
+        public string? RootPath { get; set; }
     }
 }

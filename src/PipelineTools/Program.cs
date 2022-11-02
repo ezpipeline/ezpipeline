@@ -13,9 +13,14 @@ public static class Program
         rootCommand.Add(new WindowsSdkEnvironmentCommand().Command);
         rootCommand.Add(new PatchDllImportCommand().Command);
         rootCommand.Add(new XCodeSetBuildSystemTypeCommand().Command);
-        rootCommand.Add(new GetNumberOfProcessorsCommand().Command);
+        rootCommand.Add(new GetCPUInfoCommand().Command);
         rootCommand.Add(new ZipCommand().Command);
         rootCommand.Add(new UnzipCommand().Command);
+        rootCommand.Add(new ZipToBlobCommand().Command);
+        rootCommand.Add(new UnzipBlobCommand().Command);
+        rootCommand.Add(new UnzipUrlCommand().Command);
+        rootCommand.Add(new FetchToolCommand().Command);
+        rootCommand.Add(new UntgzCommand().Command);
         await rootCommand.Parse(args).InvokeAsync();
     }
 }

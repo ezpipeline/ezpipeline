@@ -11,7 +11,7 @@ public class XCodeSetBuildSystemTypeCommand : AbstractCommand<XCodeSetBuildSyste
     {
     }
 
-    public override async Task HandleCommandAsync(XCodeSetBuildSystemTypeOptions options)
+    public override async Task HandleCommandAsync(XCodeSetBuildSystemTypeOptions options, CancellationToken cancellationToken)
     {
         var xcodeProjectDir = options.Input;
         if (string.IsNullOrWhiteSpace(xcodeProjectDir)) throw new ArgumentException("Missing --input argument");

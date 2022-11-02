@@ -28,57 +28,7 @@ public abstract class AbstractCommand<TOptions>
 
     public Command Command { get; }
 
-    internal static T? GetValueFor<T>(ParseResult res, IValueDescriptor<T> symbol)
-    {
-        return symbol switch
-        {
-            Argument<T> argument => res.GetValueForArgument(argument),
-            Option<T> option => res.GetValueForOption(option),
-            _ => throw new ArgumentOutOfRangeException()
-        };
-    }
-
-    public abstract Task HandleCommandAsync(TOptions options);
-
-    protected void SetEnvironmentVariable(string envName, string value)
-    {
-        Console.WriteLine($"Seting environment variable {envName} to {value}");
-        Environment.SetEnvironmentVariable(envName, value, EnvironmentVariableTarget.Process);
-        Console.WriteLine($"##vso[task.setvariable variable={envName}]{value}");
-    }
-
-    protected void PrepandPath(string envName, string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return;
-        var existingValue = Environment.GetEnvironmentVariable(envName);
-        var a = Environment.GetEnvironmentVariables();
-        var visitedPath = new HashSet<string>();
-        var combinedPaths = new List<string>();
-
-        foreach (var s in value.Split(Path.PathSeparator).Where(_ => !string.IsNullOrWhiteSpace(_)))
-            if (!Directory.Exists(s))
-            {
-                Console.Error.WriteLine($"Path not found: \"{s}\"");
-            }
-            else if (visitedPath.Add(s))
-            {
-                combinedPaths.Add(s);
-                Console.WriteLine($"{envName}: Adding path \"{s}\"");
-            }
-
-        if (!string.IsNullOrWhiteSpace(existingValue))
-            foreach (var s in existingValue.Split(Path.PathSeparator).Where(_ => !string.IsNullOrWhiteSpace(_)))
-                if (visitedPath.Add(s))
-                {
-                    combinedPaths.Add(s);
-                    Console.WriteLine($"{envName}: Existing path \"{s}\"");
-                }
-
-        var newValue = string.Join(Path.PathSeparator, combinedPaths);
-        Environment.SetEnvironmentVariable(envName, newValue, EnvironmentVariableTarget.Process);
-        Console.WriteLine($"##vso[task.setvariable variable={envName}]{newValue}");
-    }
+    public abstract Task HandleCommandAsync(TOptions options, CancellationToken cancellationToken);
 
     protected string RunProcess(string fileName, string args)
     {
@@ -126,7 +76,8 @@ public abstract class AbstractCommand<TOptions>
     private async Task OnHandleCommandAsync(InvocationContext invocationContext)
     {
         _invocationContext = invocationContext;
-        await HandleCommandAsync((TOptions)new ModelBinder<TOptions>().CreateInstance(invocationContext.BindingContext));
+        var instance = new ModelBinder<TOptions>().CreateInstance(invocationContext.BindingContext);    
+        await HandleCommandAsync((TOptions)instance, invocationContext.GetCancellationToken());
         if (_invocationContext == invocationContext)
             _invocationContext = null;
     }

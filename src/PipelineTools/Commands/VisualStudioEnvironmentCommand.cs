@@ -1,5 +1,4 @@
-﻿using System.CommandLine;
-using PipelineTools;
+﻿using PipelineTools;
 using static AzurePipelineTool.Commands.VisualStudioEnvironmentCommand;
 
 namespace AzurePipelineTool.Commands;
@@ -10,7 +9,7 @@ public class VisualStudioEnvironmentCommand : AbstractCommand<VisualStudioEnviro
     {
     }
 
-    public override async Task HandleCommandAsync(VisualStudioEnvironmentOptions options)
+    public override async Task HandleCommandAsync(VisualStudioEnvironmentOptions options, CancellationToken cancellationToken)
     {
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
         {
@@ -24,7 +23,7 @@ public class VisualStudioEnvironmentCommand : AbstractCommand<VisualStudioEnviro
 
         var toolsVersion = File
             .ReadAllText(Path.Combine(vsLocation, @"VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt")).Trim();
-        SetEnvironmentVariable("MSVC_TOOLS_VERSION", toolsVersion);
+        PipelineUtils.SetEnvironmentVariable("MSVC_TOOLS_VERSION", toolsVersion);
 
         var toolsFolder = Path.Combine(vsLocation, @"VC\Tools\MSVC", toolsVersion);
 
@@ -48,16 +47,16 @@ public class VisualStudioEnvironmentCommand : AbstractCommand<VisualStudioEnviro
             Path.Combine(vsLocation, @"Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja"),
             Path.Combine(vsLocation, @"Common7\IDE\VC\Linux\bin\ConnectionManagerExe")
         };
-        PrepandPath("PATH", string.Join(Path.PathSeparator, pathsToAdd));
+        PipelineUtils.PrepandPath("PATH", string.Join(Path.PathSeparator, pathsToAdd));
 
         var include = Path.Combine(toolsFolder, @"include");
         var atlmfcInclude = Path.Combine(toolsFolder, @"atlmfc\include");
-        PrepandPath("INCLUDE", $"{include}{Path.PathSeparator}{atlmfcInclude}");
+        PipelineUtils.PrepandPath("INCLUDE", $"{include}{Path.PathSeparator}{atlmfcInclude}");
 
 
         var lib = Path.Combine(toolsFolder, @"lib", buildPlatform);
         var atlmfcLib = Path.Combine(toolsFolder, @"atlmfc\lib", buildPlatform);
-        PrepandPath("LIB", $"{lib}{Path.PathSeparator}{atlmfcLib}");
+        PipelineUtils.PrepandPath("LIB", $"{lib}{Path.PathSeparator}{atlmfcLib}");
     }
 
     public class VisualStudioEnvironmentOptions
