@@ -6,7 +6,7 @@ namespace AzurePipelineTool.Commands;
 
 public class UnzipUrlCommand : AbstractCommand<UnzipUrlCommand.UnzipUrlOptions>
 {
-    public UnzipUrlCommand() : base("unzip-url")
+    public UnzipUrlCommand() : base("unzip-url", "Unarchive content of a web file")
     {
     }
 

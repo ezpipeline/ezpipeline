@@ -1,32 +1,30 @@
 ﻿using System.CommandLine;
-using System.CommandLine.Binding;
 using System.CommandLine.Invocation;
 using System.CommandLine.NamingConventionBinder;
-using System.CommandLine.Parsing;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
 namespace PipelineTools;
 
-public abstract class AbstractCommand<TOptions>
+public abstract class AbstractCommand<TOptions>: CommandBase
 {
     private InvocationContext? _invocationContext;
 
-    public AbstractCommand(string command, string description = null)
+    public AbstractCommand(string command, string description)
     {
         Command = new Command(command, description);
         var props = typeof(TOptions).GetProperties();
         foreach (var propertyInfo in props)
         {
             var attr = propertyInfo.GetCustomAttribute<CommandLineOptionAttribute>();
-            if (attr != null) Command.AddOption(attr.MakeOption(propertyInfo));
+            if (attr != null) Command.Add(attr.MakeOption(propertyInfo));
         }
 
         Command.SetHandler(OnHandleCommandAsync);
     }
 
-    public Command Command { get; }
+    public override Command Command { get; }
 
     public abstract Task HandleCommandAsync(TOptions options, CancellationToken cancellationToken);
 
@@ -75,10 +73,20 @@ public abstract class AbstractCommand<TOptions>
 
     private async Task OnHandleCommandAsync(InvocationContext invocationContext)
     {
-        _invocationContext = invocationContext;
-        var instance = new ModelBinder<TOptions>().CreateInstance(invocationContext.BindingContext);    
-        await HandleCommandAsync((TOptions)instance, invocationContext.GetCancellationToken());
-        if (_invocationContext == invocationContext)
-            _invocationContext = null;
+        try
+        {
+            _invocationContext = invocationContext;
+            TOptions instance = (TOptions)new ModelBinder<TOptions>().CreateInstance(invocationContext.BindingContext);
+            await HandleCommandAsync(instance, invocationContext.GetCancellationToken());
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+        finally
+        {
+            if (_invocationContext == invocationContext)
+                _invocationContext = null;
+        }
     }
 }

@@ -6,7 +6,7 @@ namespace AzurePipelineTool.Commands;
 
 public class ZipCommand : AbstractCommand<ZipCommand.ZipOptions>
 {
-    public ZipCommand() : base("zip")
+    public ZipCommand() : base("zip", "Archive folder into .zip file")
     {
     }
 

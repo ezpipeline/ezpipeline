@@ -9,7 +9,7 @@ namespace AzurePipelineTool.Commands;
 
 public class FetchToolCommand : AbstractCommand<FetchToolCommand.FetchToolOptions>
 {
-    public FetchToolCommand() : base("fetch-tool")
+    public FetchToolCommand() : base("fetch-tool", "Fetch tool (ninja, cmake, etc.)")
     {
     }
 

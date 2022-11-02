@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Runtime.InteropServices;
 using PipelineTools;
 using static AzurePipelineTool.Commands.GetCPUInfoCommand;
 
@@ -6,7 +7,7 @@ namespace AzurePipelineTool.Commands;
 
 public class GetCPUInfoCommand : AbstractCommand<GetNumberOfProcessorsOptions>
 {
-    public GetCPUInfoCommand() : base("cpu-info")
+    public GetCPUInfoCommand() : base("cpu-info", "Get CPU info")
     {
     }
 
@@ -19,7 +20,7 @@ public class GetCPUInfoCommand : AbstractCommand<GetNumberOfProcessorsOptions>
                 result = Environment.ProcessorCount.ToString(CultureInfo.InvariantCulture);
                 break;
             case CpuInfo.Arch:
-                Console.WriteLine(System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture);
+                result = RuntimeInformation.ProcessArchitecture.ToString().ToLower();
                 break;
         }
         Console.WriteLine(result);

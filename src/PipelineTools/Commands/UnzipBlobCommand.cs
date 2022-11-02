@@ -6,7 +6,7 @@ namespace AzurePipelineTool.Commands;
 
 public class UnzipBlobCommand : AbstractCommand<UnzipBlobOptions>
 {
-    public UnzipBlobCommand() : base("unzip-blob")
+    public UnzipBlobCommand() : base("unzip-blob", "Unarchive content of Azure Blob")
     {
     }
 

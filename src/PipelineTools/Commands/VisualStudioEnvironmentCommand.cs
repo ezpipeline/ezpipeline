@@ -5,7 +5,7 @@ namespace AzurePipelineTool.Commands;
 
 public class VisualStudioEnvironmentCommand : AbstractCommand<VisualStudioEnvironmentOptions>
 {
-    public VisualStudioEnvironmentCommand() : base("vsenv")
+    public VisualStudioEnvironmentCommand() : base("vsenv", "Setup VisualStudio environment variables")
     {
     }
 

@@ -5,7 +5,7 @@ namespace AzurePipelineTool.Commands;
 
 public class PatchDllImportCommand : AbstractCommand<PatchDllImportCommand.PatchDllImportOptions>
 {
-    public PatchDllImportCommand() : base("patch-dllimport")
+    public PatchDllImportCommand() : base("patch-dllimport", "Patch dllimport in an assembly bytecode")
     {
     }
 

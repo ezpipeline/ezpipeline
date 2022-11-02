@@ -6,7 +6,7 @@ namespace AzurePipelineTool.Commands;
 
 public class UntgzCommand : AbstractCommand<UntgzCommand.Options>
 {
-    public UntgzCommand() : base("untgz")
+    public UntgzCommand() : base("untgz", "Unarchive content of .tar.gz file")
     {
     }
 

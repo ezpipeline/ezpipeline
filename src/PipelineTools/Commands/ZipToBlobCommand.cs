@@ -8,7 +8,7 @@ namespace AzurePipelineTool.Commands;
 
 public class ZipToBlobCommand : AbstractCommand<ZipToBlobCommand.ZipToBlobOptions>
 {
-    public ZipToBlobCommand() : base("zip-to-blob")
+    public ZipToBlobCommand() : base("zip-to-blob", "Archive folder into .zip Azure Blob")
     {
     }
 

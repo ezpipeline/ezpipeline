@@ -5,7 +5,7 @@ namespace AzurePipelineTool.Commands;
 
 public class WindowsSdkEnvironmentCommand : AbstractCommand<WindowsSdkEnvironmentOptions>
 {
-    public WindowsSdkEnvironmentCommand() : base("winsdkenv")
+    public WindowsSdkEnvironmentCommand() : base("winsdkenv", "Setup WindowsSDK environment variables")
     {
     }
 

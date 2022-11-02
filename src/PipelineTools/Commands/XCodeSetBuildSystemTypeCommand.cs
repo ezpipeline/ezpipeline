@@ -7,7 +7,7 @@ namespace AzurePipelineTool.Commands;
 
 public class XCodeSetBuildSystemTypeCommand : AbstractCommand<XCodeSetBuildSystemTypeOptions>
 {
-    public XCodeSetBuildSystemTypeCommand() : base("xcode-setbuildsystemtype")
+    public XCodeSetBuildSystemTypeCommand() : base("xcode-setbuildsystemtype", "Patch XCode build system workspace property")
     {
     }
 

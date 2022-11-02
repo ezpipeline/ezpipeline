@@ -7,7 +7,7 @@ namespace AzurePipelineTool.Commands;
 
 public class UnzipCommand : AbstractCommand<UnzipOptions>
 {
-    public UnzipCommand() : base("unzip")
+    public UnzipCommand() : base("unzip", "Unarchive content of .zip file")
     {
     }
 
