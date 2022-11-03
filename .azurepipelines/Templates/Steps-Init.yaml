@@ -4,6 +4,6 @@ steps:
     displayName: 'Checkout project'
     
   - script: |
-      dotnet tool dotnet tool restore
+      dotnet tool restore
     workingDirectory: $(Build.SourcesDirectory)
     displayName: Restore tools
