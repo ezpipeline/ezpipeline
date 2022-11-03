@@ -1,0 +1,9 @@
+steps:
+  - checkout: self
+    submodules: recursive
+    displayName: 'Checkout project'
+    
+  - script: |
+      dotnet tool dotnet tool restore
+    workingDirectory: $(Build.SourcesDirectory)
+    displayName: Restore tools
