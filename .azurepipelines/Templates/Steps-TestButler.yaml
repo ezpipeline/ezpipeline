@@ -1,0 +1,11 @@
+steps:
+  - script: |
+      dotnet AzurePipelineTool.dll fetch-tool -n Butler -o Butler 
+    workingDirectory: $(Build.SourcesDirectory)/bin/
+    displayName: Fetch Butler
+
+  - script: |
+      butler help
+    workingDirectory: $(Build.SourcesDirectory)/bin/Butler/
+    displayName: Run Butler
+

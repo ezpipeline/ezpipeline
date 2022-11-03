@@ -1,0 +1,5 @@
+steps:
+  - script: |
+      dotnet publish $(Build.SourcesDirectory)/src/PipelineTools/AzurePipelineTool.csproj -o $(Build.SourcesDirectory)/bin/ -c Release
+    workingDirectory: $(Build.SourcesDirectory)
+    displayName: Build AzurePipelineTool

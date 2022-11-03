@@ -1,0 +1,26 @@
+#Azure DevOps yaml script to build and publish rbfx game on 2 platforms
+
+trigger: none
+#- master
+
+stages:
+- stage: Build_And_Test
+  displayName: Build And Test
+  jobs:
+  - job: Test_Butler
+    displayName: 'Test Butler'
+    strategy:
+      matrix:
+        linux:
+          imageName: 'ubuntu-latest'
+        mac:
+          imageName: 'macOS-latest'
+        windows:
+          imageName: 'windows-latest'
+
+    pool:
+      vmImage: $(imageName)
+
+    steps:
+    - template: Templates/Steps-Build.yaml
+    - template: Templates/Steps-TestButler.yaml

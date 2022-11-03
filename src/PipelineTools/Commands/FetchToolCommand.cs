@@ -199,7 +199,8 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.FetchToolOption
             Temp = options.Temp,
             Output = options.Output,
             Overwrite = options.Overwrite,
-            Url = url
+            Url = url,
+            ArchiveType = ArchiveType.zip
         }, cancellationToken);
 
         if (options.Path)

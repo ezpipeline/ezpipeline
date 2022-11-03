@@ -13,14 +13,14 @@ public class UnzipBlobCommand : AbstractCommand<UnzipBlobOptions>
     public override async Task HandleCommandAsync(UnzipBlobOptions options, CancellationToken cancellationToken)
     {
         var container = new BlobContainerClient(options.ConnectionString, options.ContainerName);
-        await container.CreateIfNotExistsAsync();
+        await container.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
 
         var tempFileName = PipelineUtils.GetTempFileName(options.Temp);
 
         var blobClient = container.GetBlobClient(options.BlobName);
         try
         {
-            await blobClient.DownloadToAsync(tempFileName);
+            await blobClient.DownloadToAsync(tempFileName, cancellationToken);
             await new UnzipCommand().HandleCommandAsync(new UnzipCommand.UnzipOptions()
             {
                 Input = tempFileName,
