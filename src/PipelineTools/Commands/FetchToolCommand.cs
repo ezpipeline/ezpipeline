@@ -203,6 +203,12 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.FetchToolOption
             ArchiveType = ArchiveType.zip
         }, cancellationToken);
 
+        var fileInfo = new FileInfo(Path.Combine(options.Output, "butler"));
+        if (fileInfo.Exists)
+        {
+            Console.WriteLine($"{fileInfo.Attributes.GetType().FullName}: {fileInfo.Attributes}");
+        }
+
         if (options.Path)
         {
             PipelineUtils.PrepandPath("PATH", Path.GetFullPath(options.Output));
