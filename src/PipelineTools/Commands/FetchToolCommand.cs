@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.VisualBasic;
+using Mono.Unix;
 using PipelineTools;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -203,10 +204,17 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.FetchToolOption
             ArchiveType = ArchiveType.zip
         }, cancellationToken);
 
-        var fileInfo = new FileInfo(Path.Combine(options.Output, "butler"));
-        if (fileInfo.Exists)
+        if (Environment.OSVersion.Platform == PlatformID.Unix)
         {
-            Console.WriteLine($"{fileInfo.Attributes.GetType().FullName}: {fileInfo.Attributes}");
+            var unixFileInfo = new Mono.Unix.UnixFileInfo(Path.Combine(options.Output, "butler"));
+            if (unixFileInfo.Exists)
+            {
+                Console.WriteLine($"Making {unixFileInfo.Name} executable");
+                unixFileInfo.FileAccessPermissions = unixFileInfo.FileAccessPermissions
+                                                     | FileAccessPermissions.GroupExecute
+                                                     | FileAccessPermissions.UserExecute
+                                                     | FileAccessPermissions.OtherExecute;
+            }
         }
 
         if (options.Path)
