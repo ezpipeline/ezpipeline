@@ -1,11 +1,22 @@
 steps:
   - script: |
-      dotnet ezpipeline.dll fetch-tool -n Butler -o Butler --path
+      ezpipeline fetch-tool -n Butler -o Butler --path
+      ezpipeline fetch-tool -n Ninja -o Ninja --path
+      ezpipeline fetch-tool -n CMake -o CMake --path
     workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net6.0/any/
-    displayName: Fetch Butler
+    displayName: Fetch Tools
 
   - script: |
       butler help
     workingDirectory: $(Build.SourcesDirectory)
     displayName: Run Butler
 
+  - script: |
+      ninja --version
+    workingDirectory: $(Build.SourcesDirectory)
+    displayName: Run Ninja
+
+  - script: |
+      cmake --version
+    workingDirectory: $(Build.SourcesDirectory)
+    displayName: Run CMake
