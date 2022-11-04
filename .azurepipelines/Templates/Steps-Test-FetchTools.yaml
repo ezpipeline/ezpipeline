@@ -1,6 +1,6 @@
 steps:
   - script: |
-      dotnet ezpipeline fetch-tool -n Butler -o $(Build.SourcesDirectory)/tools/ --path
+      dotnet ezpipeline.dll fetch-tool -n Butler -o $(Build.SourcesDirectory)/tools/ --path
     workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net6.0/any/
     displayName: Fetch Butler
 
@@ -10,7 +10,7 @@ steps:
     displayName: Run Butler
 
   - script: |
-      dotnet ezpipeline fetch-tool -n Ninja -o $(Build.SourcesDirectory)/tools/ --path
+      dotnet ezpipeline.dll fetch-tool -n Ninja -o $(Build.SourcesDirectory)/tools/ --path
     workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net6.0/any/
     displayName: Fetch Ninja
 
@@ -21,7 +21,7 @@ steps:
     displayName: Run Ninja
 
   - script: |
-      dotnet ezpipeline fetch-tool -n CMake -o $(Build.SourcesDirectory)/tools/ --path
+      dotnet ezpipeline.dll fetch-tool -n CMake -o $(Build.SourcesDirectory)/tools/ --path
     workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net6.0/any/
     displayName: Fetch CMake
 
