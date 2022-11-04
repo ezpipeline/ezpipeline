@@ -1,10 +1,8 @@
 steps:
   - script: |
-      ezpipeline fetch-tool -n Butler -o Butler --path
-      ezpipeline fetch-tool -n Ninja -o Ninja --path
-      ezpipeline fetch-tool -n CMake -o CMake --path
+      ezpipeline fetch-tool -n Butler -o $(Build.SourcesDirectory)/tools/ --path
     workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net6.0/any/
-    displayName: Fetch Tools
+    displayName: Fetch Butler
 
   - script: |
       butler help
@@ -12,9 +10,20 @@ steps:
     displayName: Run Butler
 
   - script: |
+      ezpipeline fetch-tool -n Ninja -o $(Build.SourcesDirectory)/tools/ --path
+    workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net6.0/any/
+    displayName: Fetch Ninja
+
+
+  - script: |
       ninja --version
     workingDirectory: $(Build.SourcesDirectory)
     displayName: Run Ninja
+
+  - script: |
+      ezpipeline fetch-tool -n CMake -o $(Build.SourcesDirectory)/tools/ --path
+    workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net6.0/any/
+    displayName: Fetch CMake
 
   - script: |
       cmake --version
