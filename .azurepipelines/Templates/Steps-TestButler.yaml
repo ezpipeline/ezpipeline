@@ -1,6 +1,6 @@
 steps:
   - script: |
-      AzurePipelineTool fetch-tool -n Butler -o Butler 
+      azurepipelinetool fetch-tool -n Butler -o Butler 
     workingDirectory: $(Build.SourcesDirectory)/bin/
     displayName: Fetch Butler
 
