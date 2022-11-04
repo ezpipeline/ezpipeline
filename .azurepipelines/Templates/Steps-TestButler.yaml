@@ -1,6 +1,6 @@
 steps:
   - script: |
-      dotnet azurepipelinetool fetch-tool -n Butler -o Butler 
+      dotnet azurepipelinetool.dll fetch-tool -n Butler -o Butler 
     workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net6.0/any/
     displayName: Fetch Butler
 
