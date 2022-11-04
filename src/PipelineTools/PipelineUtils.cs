@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PipelineTools;
@@ -6,6 +7,13 @@ namespace PipelineTools;
 public static class PipelineUtils
 {
     public static Encoding UTF8 = new UTF8Encoding(false);
+
+    public static PlatformID GetPlatformId()
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            return PlatformID.MacOSX;
+        return Environment.OSVersion.Platform;
+    }
 
     public static Stream CreateFile(string fileName)
     {

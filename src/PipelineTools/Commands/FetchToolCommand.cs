@@ -36,7 +36,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.FetchToolOption
 
     private async Task FetchCCache(FetchToolOptions options, CancellationToken cancellationToken)
     {
-        var osVersionPlatform = Environment.OSVersion.Platform;
+        var osVersionPlatform = PipelineUtils.GetPlatformId();
         var processArchitecture = RuntimeInformation.ProcessArchitecture;
 
         if (string.IsNullOrWhiteSpace(options.Version))
@@ -63,7 +63,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.FetchToolOption
     private async Task FetchCMake(FetchToolOptions options, CancellationToken cancellationToken)
     {
         var processArchitecture = RuntimeInformation.ProcessArchitecture;
-        var osVersionPlatform = Environment.OSVersion.Platform;
+        var osVersionPlatform = PipelineUtils.GetPlatformId();
 
         var arch = "i386";
         switch (processArchitecture)
@@ -127,7 +127,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.FetchToolOption
     private async Task FetchNinja(FetchToolOptions options, CancellationToken cancellationToken)
     {
         var os = "win";
-        switch (Environment.OSVersion.Platform)
+        switch (PipelineUtils.GetPlatformId())
         {
             case PlatformID.Win32S:
             case PlatformID.Win32Windows:
@@ -163,7 +163,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.FetchToolOption
     private static async Task FetchButler(FetchToolOptions options, CancellationToken cancellationToken)
     {
         var os = "windows";
-        switch (Environment.OSVersion.Platform)
+        switch (PipelineUtils.GetPlatformId())
         {
             case PlatformID.Win32S:
             case PlatformID.Win32Windows:
