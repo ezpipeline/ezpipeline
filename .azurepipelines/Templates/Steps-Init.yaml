@@ -1,6 +1,7 @@
 steps:
   - checkout: self
     submodules: recursive
+    fetchDepth: 0
     displayName: 'Checkout project'
     
   - script: |
