@@ -11,9 +11,16 @@ public class GetCPUInfoCommand : AbstractCommand<GetNumberOfProcessorsOptions>
     {
     }
 
-    public override async Task HandleCommandAsync(GetNumberOfProcessorsOptions options, CancellationToken cancellationToken)
+    public enum CpuInfo
     {
-        string result = "";
+        Count,
+        Arch
+    }
+
+    public override async Task HandleCommandAsync(GetNumberOfProcessorsOptions options,
+        CancellationToken cancellationToken)
+    {
+        var result = "";
         switch (options.Info)
         {
             case CpuInfo.Count:
@@ -23,11 +30,10 @@ public class GetCPUInfoCommand : AbstractCommand<GetNumberOfProcessorsOptions>
                 result = RuntimeInformation.ProcessArchitecture.ToString().ToLower();
                 break;
         }
+
         Console.WriteLine(result);
         if (!string.IsNullOrWhiteSpace(options.Variable))
-        {
             PipelineUtils.SetEnvironmentVariable(options.Variable, result);
-        }
     }
 
     public class GetNumberOfProcessorsOptions
@@ -37,11 +43,5 @@ public class GetCPUInfoCommand : AbstractCommand<GetNumberOfProcessorsOptions>
 
         [CommandLineOption("-v", "Environment variable to set")]
         public string? Variable { get; set; }
-    }
-
-    public enum CpuInfo
-    {
-        Count,
-        Arch,
     }
 }

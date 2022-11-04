@@ -1,5 +1,4 @@
-﻿using System.CommandLine;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PipelineTools;
@@ -78,7 +77,9 @@ public static class PipelineUtils
             if (!File.Exists(tempFileName))
             {
                 if (Directory.Exists(tempFileName))
+                {
                     tempFileName = Path.Combine(tempFileName, Guid.NewGuid().ToString());
+                }
                 else
                 {
                     if (tempFileName.EndsWith("/") || tempFileName.EndsWith("\\"))

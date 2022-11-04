@@ -7,7 +7,7 @@ using System.Text;
 
 namespace PipelineTools;
 
-public abstract class AbstractCommand<TOptions>: CommandBase
+public abstract class AbstractCommand<TOptions> : CommandBase
 {
     private InvocationContext? _invocationContext;
 
@@ -76,12 +76,8 @@ public abstract class AbstractCommand<TOptions>: CommandBase
         try
         {
             _invocationContext = invocationContext;
-            TOptions instance = (TOptions)new ModelBinder<TOptions>().CreateInstance(invocationContext.BindingContext);
+            var instance = (TOptions)new ModelBinder<TOptions>().CreateInstance(invocationContext.BindingContext);
             await HandleCommandAsync(instance, invocationContext.GetCancellationToken());
-        }
-        catch (Exception ex)
-        {
-            throw;
         }
         finally
         {

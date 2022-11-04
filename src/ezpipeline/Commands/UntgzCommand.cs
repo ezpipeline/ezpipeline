@@ -16,7 +16,7 @@ public class UntgzCommand : AbstractCommand<UntgzCommand.Options>
         {
             using (var gzip = new GZipStream(fileStream, CompressionMode.Decompress))
             {
-                using TarArchive tarArchive = TarArchive.CreateInputTarArchive(gzip, PipelineUtils.UTF8);
+                using var tarArchive = TarArchive.CreateInputTarArchive(gzip, PipelineUtils.UTF8);
                 tarArchive.SetKeepOldFiles(!options.Overwrite);
                 if (!string.IsNullOrWhiteSpace(options.RootPath))
                     tarArchive.RootPath = options.RootPath;

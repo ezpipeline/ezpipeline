@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using Azure.Storage.Blobs;
 using PipelineTools;
 
 namespace AzurePipelineTool.Commands;
@@ -26,16 +25,17 @@ public class UnzipUrlCommand : AbstractCommand<UnzipUrlCommand.UnzipUrlOptions>
                 else if (options.Url.EndsWith(".tgz", StringComparison.InvariantCultureIgnoreCase))
                     options.ArchiveType = ArchiveType.tgz;
             }
+
             switch (options.ArchiveType)
             {
                 case ArchiveType.zip:
-                    await new UnzipCommand().HandleCommandAsync(new UnzipCommand.UnzipOptions()
+                    await new UnzipCommand().HandleCommandAsync(new UnzipCommand.UnzipOptions
                     {
                         Input = tempFileName,
                         Output = options.Output,
                         Filter = options.Filter,
                         Overwrite = options.Overwrite,
-                        RootPath = options.RootPath,
+                        RootPath = options.RootPath
                     }, cancellationToken);
                     break;
                 case ArchiveType.tgz:
@@ -43,12 +43,12 @@ public class UnzipUrlCommand : AbstractCommand<UnzipUrlCommand.UnzipUrlOptions>
                         throw new NotImplementedException("Filter is not supported yet");
                     if (!string.IsNullOrWhiteSpace(options.RootPath))
                         throw new NotImplementedException("RootPath is not supported yet");
-                    await new UntgzCommand().HandleCommandAsync(new UntgzCommand.Options()
+                    await new UntgzCommand().HandleCommandAsync(new UntgzCommand.Options
                     {
                         Input = tempFileName,
                         Output = options.Output,
                         Overwrite = options.Overwrite,
-                        RootPath = options.RootPath,
+                        RootPath = options.RootPath
                     }, cancellationToken);
                     break;
                 default: throw new NotImplementedException(options.ArchiveType.ToString());
@@ -68,8 +68,7 @@ public class UnzipUrlCommand : AbstractCommand<UnzipUrlCommand.UnzipUrlOptions>
         [CommandLineOption("-f", "Filter regex")]
         public string? Filter { get; set; }
 
-        [CommandLineOption("-u", description: "URL")]
-        public string Url { get; set; }
+        [CommandLineOption("-u", "URL")] public string Url { get; set; }
 
         [CommandLineOption("-t", "Temp folder or file name")]
         public string? Temp { get; set; }
@@ -83,5 +82,4 @@ public class UnzipUrlCommand : AbstractCommand<UnzipUrlCommand.UnzipUrlOptions>
         [CommandLineOption(description: "Archive type")]
         public ArchiveType ArchiveType { get; set; }
     }
-
 }

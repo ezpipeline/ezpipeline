@@ -9,7 +9,8 @@ public class WindowsSdkEnvironmentCommand : AbstractCommand<WindowsSdkEnvironmen
     {
     }
 
-    public override async Task HandleCommandAsync(WindowsSdkEnvironmentOptions options, CancellationToken cancellationToken)
+    public override async Task HandleCommandAsync(WindowsSdkEnvironmentOptions options,
+        CancellationToken cancellationToken)
     {
         if (PipelineUtils.GetPlatformId() != PlatformID.Win32NT)
         {

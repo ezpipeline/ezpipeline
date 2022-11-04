@@ -21,7 +21,7 @@ public class UnzipBlobCommand : AbstractCommand<UnzipBlobOptions>
         try
         {
             await blobClient.DownloadToAsync(tempFileName, cancellationToken);
-            await new UnzipCommand().HandleCommandAsync(new UnzipCommand.UnzipOptions()
+            await new UnzipCommand().HandleCommandAsync(new UnzipCommand.UnzipOptions
             {
                 Input = tempFileName,
                 Output = options.Output,

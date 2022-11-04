@@ -11,20 +11,17 @@ public class UnzipCommand : AbstractCommand<UnzipOptions>
     {
     }
 
-    public static void DoUnzip(Stream fileStream, string optionsOutput, string? optionsFilter, bool overwrite, string? rootPath, CancellationToken cancellationToken)
+    public static void DoUnzip(Stream fileStream, string optionsOutput, string? optionsFilter, bool overwrite,
+        string? rootPath, CancellationToken cancellationToken)
     {
         var di = new DirectoryInfo(Path.GetFullPath(optionsOutput));
         Regex? filter = null;
         if (!string.IsNullOrWhiteSpace(optionsFilter)) filter = new Regex(optionsFilter, RegexOptions.Compiled);
 
         if (string.IsNullOrWhiteSpace(rootPath))
-        {
             rootPath = null;
-        }
         else
-        {
-            rootPath = rootPath.Replace("\\", "/").TrimEnd('/')+'/';
-        }
+            rootPath = rootPath.Replace("\\", "/").TrimEnd('/') + '/';
 
         using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Read, false))
         {
@@ -41,6 +38,7 @@ public class UnzipCommand : AbstractCommand<UnzipOptions>
                         continue;
                     entryFullName = entryFullName.Substring(rootPath.Length);
                 }
+
                 if (filter != null && !filter.IsMatch(entryFullName)) continue;
                 var fileDestinationPath = Path.GetFullPath(Path.Combine(di.FullName, entryFullName));
                 var fileName = Path.GetFileName(fileDestinationPath);

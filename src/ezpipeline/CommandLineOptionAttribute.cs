@@ -19,7 +19,8 @@ public class CommandLineOptionAttribute : Attribute
     {
         //System.CommandLine.NamingConventionBinder.ModelBinder<>
 
-        string[] aliases = new[] { "--" + DeCamel(property.Name), _alias }.Where(_ => !string.IsNullOrWhiteSpace(_)).ToArray();
+        string[] aliases = new[] { "--" + DeCamel(property.Name), _alias }.Where(_ => !string.IsNullOrWhiteSpace(_))
+            .ToArray();
         var genericType = typeof(Option<>).MakeGenericType(property.PropertyType);
         return (Option)Activator.CreateInstance(genericType, aliases, _description);
         //return new Option<string>(new[] { _alias }.Where(_ => !string.IsNullOrWhiteSpace(_)).ToArray(), _description);
@@ -27,14 +28,11 @@ public class CommandLineOptionAttribute : Attribute
 
     private string DeCamel(string name)
     {
-        var result = new StringBuilder(name.Length+2);
-        bool prevLowCase = false;
+        var result = new StringBuilder(name.Length + 2);
+        var prevLowCase = false;
         foreach (var c in name)
         {
-            if (prevLowCase && char.IsUpper(c))
-            {
-                result.Append('-');
-            }
+            if (prevLowCase && char.IsUpper(c)) result.Append('-');
 
             result.Append(char.ToLower(c));
             prevLowCase = !char.IsUpper(c);

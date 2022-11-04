@@ -9,7 +9,8 @@ public class VisualStudioEnvironmentCommand : AbstractCommand<VisualStudioEnviro
     {
     }
 
-    public override async Task HandleCommandAsync(VisualStudioEnvironmentOptions options, CancellationToken cancellationToken)
+    public override async Task HandleCommandAsync(VisualStudioEnvironmentOptions options,
+        CancellationToken cancellationToken)
     {
         if (PipelineUtils.GetPlatformId() != PlatformID.Win32NT)
         {

@@ -1,5 +1,4 @@
 ﻿using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzurePipelineTool.Commands;
 
 namespace PipelineTools;
@@ -23,11 +22,10 @@ public static class Program
             new UnzipUrlCommand(),
             new FetchToolCommand(),
             new UntgzCommand(),
+            new SendTelegramNotification(),
+            new SendDiscordNotification()
         };
-        foreach (var cmd in commands.OrderBy(_=>_.Command.Name))
-        {
-            rootCommand.Add(cmd.Command);
-        }
+        foreach (var cmd in commands.OrderBy(_ => _.Command.Name)) rootCommand.Add(cmd.Command);
 
         await rootCommand.InvokeAsync(args);
     }

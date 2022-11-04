@@ -1,6 +1,5 @@
-﻿using System.IO.Compression;
+﻿using PipelineTools;
 using SevenZip.Compression.LZMA;
-using PipelineTools;
 
 namespace AzurePipelineTool.Commands;
 
@@ -16,18 +15,19 @@ public class UntxzCommand : AbstractCommand<UntxzCommand.Options>
         {
             var decoder = new Decoder();
 
-            byte[] properties2 = new byte[5];
+            var properties2 = new byte[5];
             if (strmInStream.Read(properties2, 0, 5) != 5)
-                throw (new System.Exception("input .lzma is too short"));
+                throw new Exception("input .lzma is too short");
 
             long outSize = 0;
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
-                int v = strmInStream.ReadByte();
+                var v = strmInStream.ReadByte();
                 if (v < 0)
-                    throw (new System.Exception("Can't Read 1"));
-                outSize |= ((long)(byte)v) << (8 * i);
+                    throw new Exception("Can't Read 1");
+                outSize |= (long)(byte)v << (8 * i);
             } //Next i
+
             decoder.SetDecoderProperties(properties2);
 
             throw new NotImplementedException();

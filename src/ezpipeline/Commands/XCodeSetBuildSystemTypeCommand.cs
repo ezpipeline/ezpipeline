@@ -7,11 +7,13 @@ namespace AzurePipelineTool.Commands;
 
 public class XCodeSetBuildSystemTypeCommand : AbstractCommand<XCodeSetBuildSystemTypeOptions>
 {
-    public XCodeSetBuildSystemTypeCommand() : base("xcode-setbuildsystemtype", "Patch XCode build system workspace property")
+    public XCodeSetBuildSystemTypeCommand() : base("xcode-setbuildsystemtype",
+        "Patch XCode build system workspace property")
     {
     }
 
-    public override async Task HandleCommandAsync(XCodeSetBuildSystemTypeOptions options, CancellationToken cancellationToken)
+    public override async Task HandleCommandAsync(XCodeSetBuildSystemTypeOptions options,
+        CancellationToken cancellationToken)
     {
         var xcodeProjectDir = options.Input;
         if (string.IsNullOrWhiteSpace(xcodeProjectDir)) throw new ArgumentException("Missing --input argument");
