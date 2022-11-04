@@ -2,6 +2,6 @@
 
 <DotNetCliTool Version="1">
 	<Commands>
-		<Command Name="azurepipelinetool" EntryPoint="azurepipelinetool.dll" Runner="dotnet" />
+		<Command Name="ezpipeline" EntryPoint="ezpipeline.dll" Runner="dotnet" />
 	</Commands>
 </DotNetCliTool>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
-    <id>AzurePipelineTool</id>
+    <id>ezpipeline</id>
     <version>0</version>
     <title>Azure Pipeline Tool</title>
     <authors>gleblebedev</authors>
     <license type="expression">MIT</license>
     <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
     <projectUrl>https://github.com/gleblebedev/AzurePipelineTool</projectUrl>
-    <description>Azure pipeline tools</description>
+    <description>Easy Azure Pipeline tools</description>
     <copyright>Gleb Lebedev. All rights reserved.</copyright>
     <tags>Azure Pipeline</tags>
     <packageTypes>

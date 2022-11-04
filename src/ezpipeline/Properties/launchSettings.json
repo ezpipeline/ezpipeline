@@ -2,7 +2,7 @@
   "profiles": {
     "PipelineTools": {
       "commandName": "Project",
-      "commandLineArgs": "fetch-tool -n cmake -o cmake -p"
+      "commandLineArgs": "fetch-tool -n Butler -o Butler"
     }
   }
 }

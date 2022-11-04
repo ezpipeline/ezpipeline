@@ -5,15 +5,15 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>azurepipelinetool</AssemblyName>
+    <AssemblyName>ezpipeline</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="azurepipelinetool.xml" />
+    <None Remove="ezpipeline.xml" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="azurepipelinetool.xml">
+    <Content Include="ezpipeline.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

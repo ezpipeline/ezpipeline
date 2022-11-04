@@ -24,4 +24,4 @@ stages:
     steps:
     - template: Templates/Steps-Init.yaml
     - template: Templates/Steps-Build.yaml
-    - template: Templates/Steps-TestButler.yaml
+    - template: Templates/Steps-Test-FetchTools.yaml
