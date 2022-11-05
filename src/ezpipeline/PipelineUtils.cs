@@ -29,6 +29,7 @@ public static class PipelineUtils
     {
         Console.WriteLine($"Seting environment variable {envName} to {value}");
         Environment.SetEnvironmentVariable(envName, value, EnvironmentVariableTarget.Process);
+        var githubEnv = Environment.GetEnvironmentVariable("GITHUB_ENV");
         Console.WriteLine($"##vso[task.setvariable variable={envName}]{value}");
     }
 

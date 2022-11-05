@@ -21,8 +21,10 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: echo %GITHUB_ENV%
+    - name: Restore dependencies
+      run: dotnet restore src/ezpipeline.sln
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet publish src/ezpipeline/ezpipeline.csproj -o nuget/tools/net6.0/any/ --no-restore 
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet nuget/tools/net6.0/any/ezpipeline.dll --help

@@ -4,7 +4,7 @@
     <id>ezpipeline</id>
     <version>0</version>
     <title>Azure Pipeline Tool</title>
-    <authors>gleblebedev</authors>
+    <authors>ezpipeline</authors>
     <license type="expression">MIT</license>
     <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
     <projectUrl>https://github.com/ezpipeline/ezpipeline</projectUrl>
