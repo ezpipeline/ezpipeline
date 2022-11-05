@@ -19,7 +19,7 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore tools
-      run: dotnet tools restore
+      run: dotnet tool restore
     - name: Restore dependencies
       run: dotnet restore src/ezpipeline.sln
     - name: Build
