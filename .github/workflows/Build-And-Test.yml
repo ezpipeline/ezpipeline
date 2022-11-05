@@ -27,10 +27,10 @@ jobs:
     - name: Build
       run: dotnet publish src/ezpipeline/ezpipeline.csproj -o nuget/tools/net6.0/any/ --no-restore 
     - name: Fetch Butler
-      run: dotnet nuget/tools/net6.0/any/ezpipeline.dll fetch-tool -n Butler -o tools/
+      run: dotnet nuget/tools/net6.0/any/ezpipeline.dll fetch-tool -n Butler -o tools/ --path
     - name: Test Butler
       run: butler help
     - name: Fetch Ninja
-      run: dotnet nuget/tools/net6.0/any/ezpipeline.dll fetch-tool -n Ninja -o tools/
+      run: dotnet nuget/tools/net6.0/any/ezpipeline.dll fetch-tool -n Ninja -o tools/ --path
     - name: Test Ninja
       run: ninja --version
