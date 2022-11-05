@@ -7,13 +7,13 @@
     <authors>gleblebedev</authors>
     <license type="expression">MIT</license>
     <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
-    <projectUrl>https://github.com/gleblebedev/AzurePipelineTool</projectUrl>
+    <projectUrl>https://github.com/ezpipeline/ezpipeline</projectUrl>
     <description>Easy Azure Pipeline tools</description>
     <copyright>Gleb Lebedev. All rights reserved.</copyright>
     <tags>Azure Pipeline</tags>
     <packageTypes>
       <packageType name="DotnetTool" />
     </packageTypes>
-    <repository type="git" url="https://github.com/gleblebedev/AzurePipelineTool" />
+    <repository type="git" url="https://github.com/ezpipeline/ezpipeline" />
   </metadata>
 </package>
