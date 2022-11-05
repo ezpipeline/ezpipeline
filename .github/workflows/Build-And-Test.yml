@@ -29,8 +29,8 @@ jobs:
     - name: Fetch Butler
       run: dotnet nuget/tools/net6.0/any/ezpipeline.dll fetch-tool -n Butler -o tools/
     - name: Test Butler
-      run: tools/butler help
+      run: butler help
     - name: Fetch Ninja
       run: dotnet nuget/tools/net6.0/any/ezpipeline.dll fetch-tool -n Ninja -o tools/
     - name: Test Ninja
-      run: tools/ninja --version
+      run: ninja --version

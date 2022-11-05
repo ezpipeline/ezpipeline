@@ -25,12 +25,31 @@ public static class PipelineUtils
         return File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
     }
 
+    private static Stream AppendFile(string fileName)
+    {
+        return File.Open(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+    }
+
+
     public static void SetEnvironmentVariable(string envName, string value)
     {
-        Console.WriteLine($"Seting environment variable {envName} to {value}");
+        Console.WriteLine($"Setting environment variable {envName} to {value}");
         Environment.SetEnvironmentVariable(envName, value, EnvironmentVariableTarget.Process);
         var githubEnv = Environment.GetEnvironmentVariable("GITHUB_ENV");
-        Console.WriteLine($"##vso[task.setvariable variable={envName}]{value}");
+        if (string.IsNullOrWhiteSpace(githubEnv))
+        {
+            Console.WriteLine($"##vso[task.setvariable variable={envName}]{value}");
+        }
+        else
+        {
+            using (var file = AppendFile(githubEnv))
+            {
+                using (var writer = new StreamWriter(file, UTF8))
+                {
+                    writer.WriteLine($"{envName}={value}");
+                }
+            }
+        }
     }
 
     public static void PrepandPath(string envName, string value)
@@ -58,12 +77,13 @@ public static class PipelineUtils
                 if (visitedPath.Add(s))
                 {
                     combinedPaths.Add(s);
-                    Console.WriteLine($"{envName}: Existing path \"{s}\"");
+                        Console.WriteLine($"{envName}: Existing path \"{s}\"");
                 }
 
         var newValue = string.Join(Path.PathSeparator, combinedPaths);
-        Environment.SetEnvironmentVariable(envName, newValue, EnvironmentVariableTarget.Process);
-        Console.WriteLine($"##vso[task.setvariable variable={envName}]{newValue}");
+        SetEnvironmentVariable(envName, newValue);
+        //Environment.SetEnvironmentVariable(envName, newValue, EnvironmentVariableTarget.Process);
+        //Console.WriteLine($"##vso[task.setvariable variable={envName}]{newValue}");
     }
 
     public static string GetTempFileName(string? optionsTemp)

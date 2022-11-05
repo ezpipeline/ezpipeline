@@ -7,8 +7,6 @@ public static class Program
 {
     public static async Task Main(string[] args)
     {
-        Console.WriteLine("GITHUB_ENV = "+Environment.GetEnvironmentVariable("GITHUB_ENV"));
-
         var rootCommand = new RootCommand();
         var commands = new CommandBase[]
         {
