@@ -1,4 +1,5 @@
-﻿using PipelineTools;
+﻿using ICSharpCode.SharpZipLib.Tar;
+using PipelineTools;
 using SevenZip.Compression.LZMA;
 
 namespace AzurePipelineTool.Commands;
@@ -30,22 +31,18 @@ public class UntxzCommand : AbstractCommand<UntxzCommand.Options>
 
             decoder.SetDecoderProperties(properties2);
 
-            throw new NotImplementedException();
-            //long compressedSize = strmInStream.Length - strmInStream.Position;
-            //decoder.Code(strmInStream, strmOutStream, compressedSize, outSize, null);
+            long compressedSize = strmInStream.Length - strmInStream.Position;
+            var strmOutStream = new MemoryStream();
+            decoder.Code(strmInStream, strmOutStream, compressedSize, outSize, null);
+            strmOutStream.Flush();
+            strmOutStream.Position = 0;
 
-            //retVal = strmOutStream.ToArray();
-
-            //decoder.Code();
-            //using (var gzip = new Lz(fileStream, CompressionMode.Decompress))
-            //{
-            //    using TarArchive tarArchive = TarArchive.CreateInputTarArchive(gzip, PipelineUtils.UTF8);
-            //    tarArchive.SetKeepOldFiles(!options.Overwrite);
-            //    if (!string.IsNullOrWhiteSpace(options.RootPath))
-            //        tarArchive.RootPath = options.RootPath;
-            //    tarArchive.ExtractContents(options.Output, true);
-            //    tarArchive.Close();
-            //}
+            using TarArchive tarArchive = TarArchive.CreateInputTarArchive(strmOutStream, PipelineUtils.UTF8);
+            tarArchive.SetKeepOldFiles(!options.Overwrite);
+            if (!string.IsNullOrWhiteSpace(options.RootPath))
+                tarArchive.RootPath = options.RootPath;
+            tarArchive.ExtractContents(options.Output, true);
+            tarArchive.Close();
         }
     }
 

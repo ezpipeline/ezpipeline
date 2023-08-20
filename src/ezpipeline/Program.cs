@@ -20,8 +20,9 @@ public static class Program
             new ZipToBlobCommand(),
             new UnzipBlobCommand(),
             new UnzipUrlCommand(),
-            new FetchToolCommand(),
+            new UntxzCommand(),
             new UntgzCommand(),
+            new FetchToolCommand(),
             new SendTelegramNotification(),
             new SendDiscordNotification()
         };

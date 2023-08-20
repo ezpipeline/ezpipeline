@@ -12,9 +12,9 @@ public class WindowsSdkEnvironmentCommand : AbstractCommand<WindowsSdkEnvironmen
     public override async Task HandleCommandAsync(WindowsSdkEnvironmentOptions options,
         CancellationToken cancellationToken)
     {
-        if (PipelineUtils.GetPlatformId() != PlatformID.Win32NT)
+        if (PipelineUtils.GetPlatformId() != PlatformIdentifier.Windows)
         {
-            Console.WriteLine($"Can't setup VS on {Environment.OSVersion}");
+            Console.Error.WriteLine($"Can't setup VS on {Environment.OSVersion}");
             return;
         }
 

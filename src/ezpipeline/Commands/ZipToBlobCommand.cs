@@ -50,13 +50,13 @@ public class ZipToBlobCommand : AbstractCommand<ZipToBlobCommand.ZipToBlobOption
         public string? Filter { get; set; }
 
         [CommandLineOption("-n", "Output blob name")]
-        public string BlobName { get; set; }
+        public string? BlobName { get; set; }
 
         [CommandLineOption(description: "Connection string")]
-        public string ConnectionString { get; set; }
+        public string? ConnectionString { get; set; }
 
         [CommandLineOption("-c", "Container name")]
-        public string ContainerName { get; set; }
+        public string? ContainerName { get; set; }
 
         [CommandLineOption("-l", "Compression level")]
         public CompressionLevel CompressionLevel { get; set; } = CompressionLevel.Optimal;

@@ -19,7 +19,7 @@ public class SendDiscordNotification : AbstractCommand<SendDiscordNotification.O
     public class Options
     {
         [CommandLineOption("-u", "Web Hook URL")]
-        public string Url { get; set; }
+        public string? Url { get; set; }
 
         [CommandLineOption("-m", "Text message")]
         public string? Message { get; set; }

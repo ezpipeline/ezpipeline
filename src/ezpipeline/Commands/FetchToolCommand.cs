@@ -1,6 +1,9 @@
 ﻿using System.Runtime.InteropServices;
 using Mono.Unix;
+using Newtonsoft.Json.Serialization;
 using PipelineTools;
+using Telegram.Bot.Types;
+using static System.Net.WebRequestMethods;
 
 namespace AzurePipelineTool.Commands;
 
@@ -16,7 +19,8 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
         Butler,
         Ninja,
         CMake,
-        CCache
+        CCache,
+        Clang
     }
 
     private static async Task FetchButler(Options options, CancellationToken cancellationToken)
@@ -24,17 +28,13 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
         var os = "windows";
         switch (PipelineUtils.GetPlatformId())
         {
-            case PlatformID.Win32S:
-            case PlatformID.Win32Windows:
-            case PlatformID.Win32NT:
-            case PlatformID.WinCE:
-            case PlatformID.Xbox:
+            case PlatformIdentifier.Windows:
                 os = "windows";
                 break;
-            case PlatformID.Unix:
+            case PlatformIdentifier.Linux:
                 os = "linux";
                 break;
-            case PlatformID.MacOSX:
+            case PlatformIdentifier.MacOSX:
                 os = "darwin";
                 break;
         }
@@ -95,36 +95,96 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
             case ToolName.CCache:
                 await FetchCCache(options, cancellationToken);
                 break;
+            case ToolName.Clang:
+                await FetchClang(options, cancellationToken);
+                break;
         }
     }
 
-    private async Task FetchCCache(Options options, CancellationToken cancellationToken)
+    private async Task FetchClang(Options options, CancellationToken cancellationToken)
     {
         var osVersionPlatform = PipelineUtils.GetPlatformId();
         var processArchitecture = RuntimeInformation.ProcessArchitecture;
 
         if (string.IsNullOrWhiteSpace(options.Version))
-            options.Version = "4.7.2";
-        var url = "";
+            options.Version = "15.0.1";
+
+        string? url = null;
         switch (osVersionPlatform)
         {
-            case PlatformID.Win32S:
-            case PlatformID.Win32Windows:
-            case PlatformID.Win32NT:
-            case PlatformID.WinCE:
-            case PlatformID.Xbox:
-                if (processArchitecture == Architecture.X86)
-                    url =
-                        $"https://github.com/ccache/ccache/releases/download/v{options.Version}/ccache-{options.Version}-windows-i686.zip";
-                else
-                    url =
-                        $"https://github.com/ccache/ccache/releases/download/v{options.Version}/ccache-{options.Version}-windows-x86_64.zip";
+            case PlatformIdentifier.Windows:
+                //url = $"https://ziglang.org/deps/zig+llvm+lld+clang-x86_64-windows-gnu-{options.Version}.zip";
                 break;
-            case PlatformID.Unix:
-                url =
-                    $"https://github.com/ccache/ccache/releases/download/v{options.Version}/ccache-{options.Version}-linux-x86_64.tar.xz";
+            case PlatformIdentifier.Linux:
+                switch (processArchitecture)
+                {
+                    case Architecture.Arm64:
+                        url = $"https://github.com/llvm/llvm-project/releases/download/llvmorg-{options.Version}/clang+llvm-{options.Version}-aarch64-linux-gnu.tar.xz";
+                        break;
+                    case Architecture.X64:
+                        url = $"https://github.com/llvm/llvm-project/releases/download/llvmorg-{options.Version}/clang+llvm-{options.Version}-x86_64-unknown-linux-gnu-sles15.tar.xz";
+                        break;
+                }
+                break;
+            case PlatformIdentifier.MacOSX:
+                switch (processArchitecture)
+                {
+                    case Architecture.Arm64:
+                        url = $"https://github.com/llvm/llvm-project/releases/download/llvmorg-{options.Version}/clang+llvm-{options.Version}-arm64-apple-darwin21.0.tar.xz";
+                        break;
+                    case Architecture.X64:
+                        url = $"https://github.com/llvm/llvm-project/releases/download/llvmorg-{options.Version}/clang+llvm-{options.Version}-x86_64-apple-darwin.tar.xz";
+                        break;
+                }
                 break;
         }
+
+        await new UnzipUrlCommand().HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
+        {
+            Temp = options.Temp,
+            Output = options.Output,
+            Overwrite = options.Overwrite,
+            Url = url,
+            ArchiveType = ArchiveType.auto
+        }, cancellationToken);
+
+        PipelineUtils.PrepandPath("PATH", Path.Combine(Path.GetFullPath(options.Output), "bin"));
+    }
+
+    private async Task FetchCCache(Options options, CancellationToken cancellationToken)
+    {
+        var osVersionPlatform = PipelineUtils.GetPlatformId();
+        osVersionPlatform = PlatformIdentifier.Linux;
+        var processArchitecture = RuntimeInformation.ProcessArchitecture;
+
+        if (string.IsNullOrWhiteSpace(options.Version))
+            options.Version = "4.7.2";
+
+        string? fileName = null;
+        switch (osVersionPlatform)
+        {
+            case PlatformIdentifier.Windows:
+                if (processArchitecture == Architecture.X86)
+                    fileName = $"ccache-{options.Version}-windows-i686.zip";
+                else
+                    fileName = $"ccache-{options.Version}-windows-x86_64.zip";
+                break;
+            case PlatformIdentifier.Linux:
+                fileName = $"ccache-{options.Version}-linux-x86_64.tar.xz";
+                break;
+        }
+        var url = $"https://github.com/ccache/ccache/releases/download/v{options.Version}/{fileName}";
+
+        await new UnzipUrlCommand().HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
+        {
+            Temp = options.Temp,
+            Output = options.Output,
+            Overwrite = options.Overwrite,
+            Url = url,
+            ArchiveType = ArchiveType.auto
+        }, cancellationToken);
+
+        PipelineUtils.PrepandPath("PATH", Path.Combine(Path.GetFullPath(options.Output), Path.GetFileNameWithoutExtension(fileName)));
     }
 
     private async Task FetchCMake(Options options, CancellationToken cancellationToken)
@@ -150,21 +210,17 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
         var archiveType = ArchiveType.zip;
         switch (osVersionPlatform)
         {
-            case PlatformID.Win32S:
-            case PlatformID.Win32Windows:
-            case PlatformID.Win32NT:
-            case PlatformID.WinCE:
-            case PlatformID.Xbox:
+            case PlatformIdentifier.Windows:
                 os = "windows";
                 archiveType = ArchiveType.zip;
                 break;
-            case PlatformID.Unix:
+            case PlatformIdentifier.Linux:
                 os = "linux";
                 if (processArchitecture == Architecture.Arm64)
                     arch = "aarch64";
                 archiveType = ArchiveType.tgz;
                 break;
-            case PlatformID.MacOSX:
+            case PlatformIdentifier.MacOSX:
                 os = "macos10.10";
                 arch = "universal";
                 archiveType = ArchiveType.tgz;
@@ -187,7 +243,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
 
         if (options.Path)
         {
-            if (osVersionPlatform == PlatformID.MacOSX)
+            if (osVersionPlatform == PlatformIdentifier.MacOSX)
                 PipelineUtils.PrepandPath("PATH",
                     Path.Combine(Path.GetFullPath(options.Output),
                         $"cmake-{options.Version}-{os}-{arch}/CMake.app/Contents/bin"));
@@ -202,17 +258,13 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
         var os = "win";
         switch (PipelineUtils.GetPlatformId())
         {
-            case PlatformID.Win32S:
-            case PlatformID.Win32Windows:
-            case PlatformID.Win32NT:
-            case PlatformID.WinCE:
-            case PlatformID.Xbox:
+            case PlatformIdentifier.Windows:
                 os = "win";
                 break;
-            case PlatformID.Unix:
+            case PlatformIdentifier.Linux:
                 os = "linux";
                 break;
-            case PlatformID.MacOSX:
+            case PlatformIdentifier.MacOSX:
                 os = "mac";
                 break;
         }

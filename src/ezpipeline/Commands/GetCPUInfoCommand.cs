@@ -17,7 +17,7 @@ public class GetCPUInfoCommand : AbstractCommand<GetNumberOfProcessorsOptions>
         Arch
     }
 
-    public override async Task HandleCommandAsync(GetNumberOfProcessorsOptions options,
+    public override Task HandleCommandAsync(GetNumberOfProcessorsOptions options,
         CancellationToken cancellationToken)
     {
         var result = "";
@@ -34,6 +34,7 @@ public class GetCPUInfoCommand : AbstractCommand<GetNumberOfProcessorsOptions>
         Console.WriteLine(result);
         if (!string.IsNullOrWhiteSpace(options.Variable))
             PipelineUtils.SetEnvironmentVariable(options.Variable, result);
+        return Task.CompletedTask;
     }
 
     public class GetNumberOfProcessorsOptions

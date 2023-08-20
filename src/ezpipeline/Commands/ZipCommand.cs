@@ -10,7 +10,7 @@ public class ZipCommand : AbstractCommand<ZipCommand.ZipOptions>
     {
     }
 
-    public static void DoZip(Stream fileStream, string input, string filterPattern, CompressionLevel compressionLevel)
+    public static void DoZip(Stream fileStream, string input, string? filterPattern, CompressionLevel compressionLevel)
     {
         //if ((i.Attributes & FileAttributes.Directory) != 0)
         //{

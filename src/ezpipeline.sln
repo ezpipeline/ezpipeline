@@ -5,6 +5,8 @@ VisualStudioVersion = 17.3.32819.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ezpipeline", "ezpipeline\ezpipeline.csproj", "{43967809-2774-4D56-91D8-F50A7E035927}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ezpipeline.UnitTests", "ezpipeline.UnitTests\ezpipeline.UnitTests.csproj", "{2AA24832-30B7-490D-B873-24514198612E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{43967809-2774-4D56-91D8-F50A7E035927}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43967809-2774-4D56-91D8-F50A7E035927}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43967809-2774-4D56-91D8-F50A7E035927}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AA24832-30B7-490D-B873-24514198612E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AA24832-30B7-490D-B873-24514198612E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AA24832-30B7-490D-B873-24514198612E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AA24832-30B7-490D-B873-24514198612E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

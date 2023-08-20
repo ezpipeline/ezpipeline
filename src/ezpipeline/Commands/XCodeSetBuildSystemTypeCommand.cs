@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 using PipelineTools;
 using static AzurePipelineTool.Commands.XCodeSetBuildSystemTypeCommand;
@@ -18,55 +19,61 @@ public class XCodeSetBuildSystemTypeCommand : AbstractCommand<XCodeSetBuildSyste
         var xcodeProjectDir = options.Input;
         if (string.IsNullOrWhiteSpace(xcodeProjectDir)) throw new ArgumentException("Missing --input argument");
 
-        var buildsystemtypeValue = options.BuildSystemType;
-
-        var keyName = XName.Get("key");
         foreach (var file in Directory.GetFiles(xcodeProjectDir, "WorkspaceSettings.xcsettings",
                      SearchOption.AllDirectories))
         {
             Console.WriteLine($"Patching {file}");
-            XDocument doc;
-            var xmlText = File.ReadAllText(file);
-            xmlText = xmlText.Replace("EN\"\"http:", "EN\" \"http:");
+            var xmlText = await File.ReadAllTextAsync(file);
             try
             {
-                doc = XDocument.Parse(xmlText);
+                await File.WriteAllTextAsync(file, Patch(options, xmlText), new UTF8Encoding(false));
             }
             catch (XmlException ex)
             {
                 Console.Error.WriteLine(ex.Message);
                 Console.Error.WriteLine(xmlText);
-                continue;
+                return;
             }
-
-            var dictElement = doc.Descendants(XName.Get("dict")).FirstOrDefault();
-            var elements = dictElement.Elements().ToArray();
-            var dict = new Dictionary<string, XElement>();
-            for (var index = 0; index < elements.Length; index++)
-            {
-                var keyElement = elements[index];
-                if (keyElement.Name == keyName) dict[keyElement.Value] = elements[index + 1];
-            }
-
-            if (!dict.TryGetValue("BuildSystemType", out var buildSystemType))
-            {
-                dictElement.Add(new XElement(keyName, "BuildSystemType"));
-                dictElement.Add(new XElement(XName.Get("string"), buildsystemtypeValue));
-            }
-            else
-            {
-                buildSystemType.Value = buildsystemtypeValue;
-            }
-
-            if (!dict.TryGetValue("DisableBuildSystemDeprecationDiagnostic",
-                    out var disableBuildSystemDeprecationDiagnostic))
-            {
-                dictElement.Add(new XElement(keyName, "DisableBuildSystemDeprecationDiagnostic"));
-                dictElement.Add(new XElement(XName.Get("true")));
-            }
-
-            doc.Save(file);
         }
+    }
+
+    public string Patch(XCodeSetBuildSystemTypeOptions options, string xmlText)
+    {
+        var buildsystemtypeValue = options.BuildSystemType;
+        var keyName = XName.Get("key");
+
+        xmlText = xmlText.Replace("EN\"\"http:", "EN\" \"http:");
+        var doc = XDocument.Parse(xmlText);
+
+        var dictElement = doc.Descendants(XName.Get("dict")).FirstOrDefault();
+        var elements = dictElement.Elements().ToArray();
+        var dict = new Dictionary<string, XElement>();
+        for (var index = 0; index < elements.Length; index++)
+        {
+            var keyElement = elements[index];
+            if (keyElement.Name == keyName) dict[keyElement.Value] = elements[index + 1];
+        }
+
+        if (!dict.TryGetValue("BuildSystemType", out var buildSystemType))
+        {
+            dictElement.Add(new XElement(keyName, "BuildSystemType"));
+            dictElement.Add(new XElement(XName.Get("string"), buildsystemtypeValue));
+        }
+        else
+        {
+            buildSystemType.Value = buildsystemtypeValue;
+        }
+
+        if (!dict.TryGetValue("DisableBuildSystemDeprecationDiagnostic",
+                out var disableBuildSystemDeprecationDiagnostic))
+        {
+            dictElement.Add(new XElement(keyName, "DisableBuildSystemDeprecationDiagnostic"));
+            dictElement.Add(new XElement(XName.Get("true")));
+        }
+
+        doc.DocumentType.InternalSubset = null;
+        xmlText = doc.ToString();
+        return xmlText;
     }
 
     public class XCodeSetBuildSystemTypeOptions

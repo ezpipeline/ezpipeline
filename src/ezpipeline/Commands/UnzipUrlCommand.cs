@@ -22,6 +22,8 @@ public class UnzipUrlCommand : AbstractCommand<UnzipUrlCommand.UnzipUrlOptions>
                     options.ArchiveType = ArchiveType.zip;
                 else if (options.Url.EndsWith(".tar.gz", StringComparison.InvariantCultureIgnoreCase))
                     options.ArchiveType = ArchiveType.tgz;
+                else if (options.Url.EndsWith(".tar.xz", StringComparison.InvariantCultureIgnoreCase))
+                    options.ArchiveType = ArchiveType.txz;
                 else if (options.Url.EndsWith(".tgz", StringComparison.InvariantCultureIgnoreCase))
                     options.ArchiveType = ArchiveType.tgz;
             }
@@ -44,6 +46,19 @@ public class UnzipUrlCommand : AbstractCommand<UnzipUrlCommand.UnzipUrlOptions>
                     if (!string.IsNullOrWhiteSpace(options.RootPath))
                         throw new NotImplementedException("RootPath is not supported yet");
                     await new UntgzCommand().HandleCommandAsync(new UntgzCommand.Options
+                    {
+                        Input = tempFileName,
+                        Output = options.Output,
+                        Overwrite = options.Overwrite,
+                        RootPath = options.RootPath
+                    }, cancellationToken);
+                    break;
+                case ArchiveType.txz:
+                    if (!string.IsNullOrWhiteSpace(options.Filter))
+                        throw new NotImplementedException("Filter is not supported yet");
+                    if (!string.IsNullOrWhiteSpace(options.RootPath))
+                        throw new NotImplementedException("RootPath is not supported yet");
+                    await new UntxzCommand().HandleCommandAsync(new UntxzCommand.Options
                     {
                         Input = tempFileName,
                         Output = options.Output,

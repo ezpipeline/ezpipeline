@@ -17,13 +17,10 @@ public class CommandLineOptionAttribute : Attribute
 
     public Option MakeOption(PropertyInfo property)
     {
-        //System.CommandLine.NamingConventionBinder.ModelBinder<>
-
-        string[] aliases = new[] { "--" + DeCamel(property.Name), _alias }.Where(_ => !string.IsNullOrWhiteSpace(_))
+        string?[] aliases = new[] { "--" + DeCamel(property.Name), _alias }.Where(_ => !string.IsNullOrWhiteSpace(_))
             .ToArray();
         var genericType = typeof(Option<>).MakeGenericType(property.PropertyType);
-        return (Option)Activator.CreateInstance(genericType, aliases, _description);
-        //return new Option<string>(new[] { _alias }.Where(_ => !string.IsNullOrWhiteSpace(_)).ToArray(), _description);
+        return (Option)Activator.CreateInstance(genericType, aliases, _description)!;
     }
 
     private string DeCamel(string name)

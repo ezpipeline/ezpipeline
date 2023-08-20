@@ -3,14 +3,14 @@
   <metadata>
     <id>ezpipeline</id>
     <version>0</version>
-    <title>Azure Pipeline Tool</title>
+    <title>Easy Pipeline</title>
     <authors>ezpipeline</authors>
     <license type="expression">MIT</license>
     <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
     <projectUrl>https://github.com/ezpipeline/ezpipeline</projectUrl>
-    <description>Easy Azure Pipeline tools</description>
-    <copyright>Gleb Lebedev. All rights reserved.</copyright>
-    <tags>Azure Pipeline</tags>
+    <description>Azure Pipeline / GitHub Action simplification tool</description>
+    <copyright>ezpipeline. MIT license.</copyright>
+    <tags>Azure Pipeline GitHub Action</tags>
     <packageTypes>
       <packageType name="DotnetTool" />
     </packageTypes>

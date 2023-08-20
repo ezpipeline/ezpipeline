@@ -4,5 +4,6 @@ public enum ArchiveType
 {
     auto,
     zip,
-    tgz
+    tgz,
+    txz
 }
