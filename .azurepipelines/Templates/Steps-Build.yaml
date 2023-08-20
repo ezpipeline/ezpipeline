@@ -1,5 +1,6 @@
 steps:
   - script: |
-      dotnet publish $(Build.SourcesDirectory)/src/ezpipeline/ezpipeline.csproj -o $(Build.SourcesDirectory)/nuget/tools/net6.0/any/ -c Release
+      dotnet publish -f net6.0 $(Build.SourcesDirectory)/src/ezpipeline/ezpipeline.csproj -o $(Build.SourcesDirectory)/nuget/tools/net6.0/any/ -c Release
+      dotnet publish -f net7.0 $(Build.SourcesDirectory)/src/ezpipeline/ezpipeline.csproj -o $(Build.SourcesDirectory)/nuget/tools/net7.0/any/ -c Release
     workingDirectory: $(Build.SourcesDirectory)
     displayName: Build ezpipeline
