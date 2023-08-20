@@ -16,7 +16,7 @@ public class PatchDllImportCommand : AbstractCommand<PatchDllImportCommand.Patch
 
         var assembly = AssemblyDefinition.ReadAssembly(fileName);
         var moduleName = options.NewValue;
-        if (string.IsNullOrWhiteSpace(moduleName)) throw new ArgumentException("Missing --value argument");
+        if (string.IsNullOrWhiteSpace(moduleName)) throw new ArgumentException("Missing --new-value argument");
 
         foreach (var typeDefinition in assembly.EnumerateTypes())
         foreach (var methodDefinition in typeDefinition.Methods)

@@ -133,5 +133,6 @@ $RECYCLE.BIN/
 
 _NCrunch*
 nuget/tools/net6.0/any
+nuget/tools/net7.0/any
 *.nupkg
 pack.bat
