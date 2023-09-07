@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System.ComponentModel.Design;
+using System.IO.Compression;
 using System.Text.RegularExpressions;
 using PipelineTools;
 

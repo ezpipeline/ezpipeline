@@ -14,7 +14,7 @@ public class UnzipCommand : AbstractCommand<UnzipOptions>
     public static void DoUnzip(Stream fileStream, string optionsOutput, string? optionsFilter, bool overwrite,
         string? rootPath, CancellationToken cancellationToken)
     {
-        var di = new DirectoryInfo(Path.GetFullPath(optionsOutput));
+        var di = new DirectoryInfo(PipelineUtils.ResolvePath(optionsOutput));
         Regex? filter = null;
         if (!string.IsNullOrWhiteSpace(optionsFilter)) filter = new Regex(optionsFilter, RegexOptions.Compiled);
 
@@ -60,7 +60,7 @@ public class UnzipCommand : AbstractCommand<UnzipOptions>
 
     public override async Task HandleCommandAsync(UnzipOptions options, CancellationToken cancellationToken)
     {
-        using (var fileStream = PipelineUtils.OpenFile(options.Input))
+        using (var fileStream = PipelineUtils.OpenFile(PipelineUtils.ResolvePath(options.Input)))
         {
             DoUnzip(fileStream, options.Output, options.Filter, options.Overwrite, options.RootPath, cancellationToken);
         }

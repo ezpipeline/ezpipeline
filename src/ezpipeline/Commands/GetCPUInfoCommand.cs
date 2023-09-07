@@ -32,8 +32,7 @@ public class GetCPUInfoCommand : AbstractCommand<GetNumberOfProcessorsOptions>
         }
 
         Console.WriteLine(result);
-        if (!string.IsNullOrWhiteSpace(options.Variable))
-            PipelineUtils.SetEnvironmentVariable(options.Variable, result);
+        PipelineUtils.SetEnvironmentVariable(options.Variable, result);
         return Task.CompletedTask;
     }
 

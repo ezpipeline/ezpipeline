@@ -14,7 +14,10 @@ public class PatchDllImportCommand : AbstractCommand<PatchDllImportCommand.Patch
         var fileName = options.Input;
         if (string.IsNullOrWhiteSpace(options.Input)) throw new ArgumentException("Missing --input argument");
 
-        var assembly = AssemblyDefinition.ReadAssembly(fileName);
+        var inputFullPath = Path.GetFullPath(fileName);
+        Console.WriteLine($"Reading {inputFullPath}");
+
+        var assembly = AssemblyDefinition.ReadAssembly(inputFullPath);
         var moduleName = options.NewValue;
         if (string.IsNullOrWhiteSpace(moduleName)) throw new ArgumentException("Missing --new-value argument");
 
@@ -26,7 +29,10 @@ public class PatchDllImportCommand : AbstractCommand<PatchDllImportCommand.Patch
                 methodDefinition.PInvokeInfo.Module.Name = moduleName;
             }
 
-        assembly.Write(options.Output);
+        var outputFullPath = Path.GetFullPath(options.Output);
+        Console.WriteLine($"Writing {outputFullPath}");
+        Directory.CreateDirectory(Path.GetDirectoryName(outputFullPath));
+        assembly.Write(outputFullPath);
     }
 
     public class PatchDllImportOptions

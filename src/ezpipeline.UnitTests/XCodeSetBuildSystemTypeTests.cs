@@ -19,6 +19,7 @@ namespace ezpipeline
         {
             _output = output;
         }
+
         [Fact]
         public void GenerateReadableXml()
         {

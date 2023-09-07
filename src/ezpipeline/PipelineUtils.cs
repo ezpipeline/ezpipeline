@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PipelineTools;
@@ -21,6 +22,104 @@ public static class PipelineUtils
         return PlatformIdentifier.Unknown;
     }
 
+    public static IEnumerable<string> ResolvePaths(string path)
+    {
+        path = Path.GetFullPath(path);
+        if (!path.Contains("?") && !path.Contains("*"))
+        {
+            yield return path;
+            yield break;
+        }
+
+        var lookUpFolders = new HashSet<string>();
+        var nextFolders = new HashSet<string>();
+
+        var segments = path.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
+        
+        if (path.StartsWith('\\') || path.StartsWith('/'))
+            lookUpFolders.Add(path.Substring(0, 1));
+        else
+            lookUpFolders.Add("");
+
+        for (var index = 0; index < segments.Length && lookUpFolders.Count > 0; index++)
+        {
+            var segment = segments[index];
+            bool isLastSegment = index == segments.Length - 1;
+            if (segment == "**")
+            {
+                foreach (var folder in lookUpFolders)
+                {
+                    nextFolders.Add(folder);
+                    foreach (var dir in Directory.GetDirectories(folder, "*", SearchOption.AllDirectories))
+                    {
+                        nextFolders.Add(dir + Path.DirectorySeparatorChar);
+                    }
+                }
+            }
+            else if (segment.Contains('*') || segment.Contains('?'))
+            {
+                if (isLastSegment)
+                {
+                    foreach (var folder in lookUpFolders)
+                    {
+                        foreach (var file in Directory.GetFiles(folder, segment))
+                        {
+                            yield return file;
+                        }
+                    }
+                }
+
+                foreach (var folder in lookUpFolders)
+                {
+                    foreach (var subdir in Directory.GetDirectories(folder, segment))
+                    {
+                        nextFolders.Add(subdir + Path.DirectorySeparatorChar);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var folder in lookUpFolders)
+                {
+                    var combined = Path.Combine(folder, segment);
+                    if (File.Exists(combined))
+                        nextFolders.Add(combined);
+                    else if (Directory.Exists(combined))
+                        nextFolders.Add(combined + Path.DirectorySeparatorChar);
+                }
+            }
+
+            (lookUpFolders, nextFolders) = (nextFolders, lookUpFolders);
+            nextFolders.Clear();
+        }
+
+        foreach (var lookUpFolder in lookUpFolders)
+        {
+            yield return lookUpFolder;
+        }
+    }
+
+    public static string? ResolvePath(string path)
+    {
+        bool hasResult = false;
+        string result = Path.GetFullPath(path);
+        foreach (var resolvedPath in ResolvePaths(path).Distinct())
+        {
+            if (hasResult)
+            {
+                throw new Exception($"Can't resolve path {path} because of multiple options: {result}, {resolvedPath}...");
+            }
+        }
+
+        return Path.GetFullPath(path);
+    }
+
+    public static Stream OpenOrCreateFile(string fileName)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(fileName)) ?? string.Empty);
+        return File.Open(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+    }
+
     public static Stream CreateFile(string fileName)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(fileName)) ?? string.Empty);
@@ -40,6 +139,9 @@ public static class PipelineUtils
 
     public static void SetEnvironmentVariable(string envName, string value)
     {
+        if (string.IsNullOrWhiteSpace(envName))
+            return;
+
         Console.WriteLine($"Setting environment variable {envName} to {value}");
         Environment.SetEnvironmentVariable(envName, value, EnvironmentVariableTarget.Process);
         var githubEnv = Environment.GetEnvironmentVariable("GITHUB_ENV");
