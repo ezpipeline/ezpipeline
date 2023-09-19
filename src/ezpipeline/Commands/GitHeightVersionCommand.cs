@@ -30,16 +30,27 @@ public class GitHeightVersionCommand : AbstractCommand<GitHeightVersionCommand.O
 
     public override async Task HandleCommandAsync(Options options, CancellationToken cancellationToken)
     {
-        var fullPath = Path.GetFullPath(options.Input);
-        var workingDirectory = fullPath;
-
-        if (File.Exists(workingDirectory))
+        string firstCommit;
+        string workingDirectory = Directory.GetCurrentDirectory();
+        if (string.IsNullOrWhiteSpace(options.Input))
         {
-            workingDirectory = Path.GetDirectoryName(workingDirectory);
+            var gitLog = await Cli.Wrap("git").WithArguments(new[] { "rev-list", "--max-parents=0", "HEAD" }).ExecuteBufferedAsync();
+            firstCommit = gitLog.StandardOutput.Trim();
+        }
+        else
+        {
+            var fullPath = Path.GetFullPath(options.Input);
+            workingDirectory = fullPath;
+
+            if (File.Exists(workingDirectory))
+            {
+                workingDirectory = Path.GetDirectoryName(workingDirectory);
+            }
+            var gitLog = await Cli.Wrap("git").WithWorkingDirectory(workingDirectory).WithArguments(new[] { "log", "-n1", "--pretty=format:%H", "--", fullPath }).ExecuteBufferedAsync();
+            firstCommit = gitLog.StandardOutput.Trim();
         }
 
-        var gitLog = await Cli.Wrap("git").WithWorkingDirectory(workingDirectory).WithArguments(new[] { "log", "-n1", "--pretty=format:%H", "--", fullPath }).ExecuteBufferedAsync();
-        var firstCommit = gitLog.StandardOutput.Trim();
+
         var gitHeight = await Cli.Wrap("git").WithWorkingDirectory(workingDirectory).WithArguments(new[] { "rev-list", "--first-parent", "--count", $"{firstCommit}..HEAD" }).ExecuteBufferedAsync();
         var height = int.Parse(gitHeight.StandardOutput.Trim(), CultureInfo.InvariantCulture);
 

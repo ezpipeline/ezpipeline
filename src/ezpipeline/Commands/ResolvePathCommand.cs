@@ -12,7 +12,12 @@ public class ResolvePathCommand : AbstractCommand<ResolvePathCommand.Options>
     {
         int count = 0;
         string lastPath = null;
-        foreach (var resolvePath in PipelineUtils.ResolvePaths(options.Input))
+        IEnumerable<string> elements = PipelineUtils.ResolvePaths(options.Input).Take(options.Take);
+        if (options.Directory)
+        {
+            elements = elements.Select(_ => Path.GetDirectoryName(_)).Distinct();
+        }
+        foreach (var resolvePath in elements)
         {
             Console.WriteLine(resolvePath);
             ++count;
@@ -42,5 +47,11 @@ public class ResolvePathCommand : AbstractCommand<ResolvePathCommand.Options>
 
         [CommandLineOption("-v", "Environment variable to set")]
         public string? Variable { get; set; }
+
+        [CommandLineOption("-t", "Number of elements to take")]
+        public int Take { get; set; } = int.MaxValue;
+
+        [CommandLineOption("-d", "Take directory instead of elements found")]
+        public bool Directory { get; set; }
     }
 }

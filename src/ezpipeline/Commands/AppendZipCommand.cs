@@ -32,11 +32,16 @@ public class AppendZipCommand : AbstractCommand<AppendZipCommand.ZipOptions>
         var searchPattern = "*";
         using (var archive = new ZipArchive(fileStream, mode, false))
         {
-            var existingEntries = (mode == ZipArchiveMode.Update) ? new HashSet<string>(archive.Entries.Select(_ => _.FullName)) : new HashSet<string>();
+            var existingEntries = (mode == ZipArchiveMode.Update) ? new HashSet<string>(archive.Entries.Select(_ => _.FullName.Replace('\\','/'))) : new HashSet<string>();
 
             foreach (var file in di.EnumerateFileSystemInfos(searchPattern, SearchOption.AllDirectories))
             {
                 var entryName = subfolder + EntryFromPath(file.FullName, basePath);
+                if (file is DirectoryInfo)
+                {
+                    entryName += "/";
+                }
+
                 if (!existingEntries.Contains(entryName))
                 {
                     if (filter != null && !filter.IsMatch(entryName))
@@ -56,9 +61,8 @@ public class AppendZipCommand : AbstractCommand<AppendZipCommand.ZipOptions>
                         // Entry marking an empty dir:
                         if (file is DirectoryInfo possiblyEmpty && !possiblyEmpty.EnumerateFileSystemInfos().Any())
                         {
-                            var dirEntry = $"{entryName}/";
-                            archive.CreateEntry(dirEntry);
-                            Console.WriteLine(dirEntry);
+                            archive.CreateEntry(entryName);
+                            Console.WriteLine(entryName);
                         }
                     }
                 }
@@ -85,7 +89,7 @@ public class AppendZipCommand : AbstractCommand<AppendZipCommand.ZipOptions>
 
         if (end <= start)
             return string.Empty;
-        return fileFullName.Substring(start, end - start).Replace('\"', '/');
+        return fileFullName.Substring(start, end - start).Replace('\\', '/');
     }
 
     public override Task HandleCommandAsync(ZipOptions options, CancellationToken cancellationToken)

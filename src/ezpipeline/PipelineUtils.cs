@@ -99,7 +99,7 @@ public static class PipelineUtils
         }
     }
 
-    public static string? ResolvePath(string path)
+    public static string ResolvePath(string path)
     {
         bool hasResult = false;
         string result = Path.GetFullPath(path);
@@ -109,9 +109,11 @@ public static class PipelineUtils
             {
                 throw new Exception($"Can't resolve path {path} because of multiple options: {result}, {resolvedPath}...");
             }
+
+            result = resolvedPath;
         }
 
-        return Path.GetFullPath(path);
+        return result;
     }
 
     public static Stream OpenOrCreateFile(string fileName)
@@ -128,12 +130,12 @@ public static class PipelineUtils
 
     public static Stream OpenFile(string fileName)
     {
-        return File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        return File.Open(ResolvePath(fileName), FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
     }
 
     private static Stream AppendFile(string fileName)
     {
-        return File.Open(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+        return File.Open(ResolvePath(fileName), FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
     }
 
 

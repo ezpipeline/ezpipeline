@@ -31,7 +31,6 @@ public class UnzipCommand : AbstractCommand<UnzipOptions>
                     return;
                 var entryFullName = entry.FullName;
 
-
                 if (rootPath != null && entryFullName.StartsWith(rootPath))
                 {
                     if (entryFullName.Length == rootPath.Length)
@@ -60,7 +59,7 @@ public class UnzipCommand : AbstractCommand<UnzipOptions>
 
     public override async Task HandleCommandAsync(UnzipOptions options, CancellationToken cancellationToken)
     {
-        using (var fileStream = PipelineUtils.OpenFile(PipelineUtils.ResolvePath(options.Input)))
+        using (var fileStream = PipelineUtils.OpenFile(options.Input))
         {
             DoUnzip(fileStream, options.Output, options.Filter, options.Overwrite, options.RootPath, cancellationToken);
         }

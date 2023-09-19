@@ -7,9 +7,33 @@ public static class Program
 {
     public static async Task<int> Main(string[] args)
     {
-        Console.WriteLine("ezpipeline "+string.Join(" ", args));
+        //Console.WriteLine("ezpipeline "+string.Join(" ", args));
+
+        List<string> filteredArgs = new List<string>();
+        bool doubleDash = false;
+        bool printArgs = false;
+        foreach (var arg in args)
+        {
+            if (!doubleDash && !printArgs)
+            {
+                if (arg == "--echo")
+                {
+                    Console.WriteLine("ezpipeline " + string.Join(" ", args));
+                    printArgs = true;
+                    continue;
+                }
+            }
+
+            if (arg == "--")
+            {
+                doubleDash = true;
+            }
+            filteredArgs.Add(arg);
+        }
 
         var rootCommand = new RootCommand();
+        rootCommand.AddGlobalOption(new Option<bool>("--echo", description:"Print command line arguments to output"));
+
         var commands = new CommandBase[]
         {
             new AppendZipCommand(),
@@ -34,6 +58,6 @@ public static class Program
         };
         foreach (var cmd in commands.OrderBy(_ => _.Command.Name)) rootCommand.Add(cmd.Command);
 
-        return await rootCommand.InvokeAsync(args);
+        return await rootCommand.InvokeAsync(filteredArgs.ToArray());
     }
 }
