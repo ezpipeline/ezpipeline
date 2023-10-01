@@ -32,8 +32,7 @@ public class SendTelegramNotification : AbstractCommand<SendTelegramNotification
 
         if (!string.IsNullOrWhiteSpace(options.ChatId) && !string.IsNullOrWhiteSpace(options.Message))
         {
-            var message = await telegramBot.SendTextMessageAsync(options.ChatId, options.Message,
-                options.ParseMode, cancellationToken: cancellationToken);
+            var message = await telegramBot.SendTextMessageAsync(options.ChatId, options.Message, parseMode: options.ParseMode, cancellationToken: cancellationToken);
         }
     }
 

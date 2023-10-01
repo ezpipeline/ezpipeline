@@ -1,27 +1,89 @@
 ﻿using System.Runtime.InteropServices;
 using Mono.Unix;
-using Newtonsoft.Json.Serialization;
 using PipelineTools;
-using Telegram.Bot.Types;
-using static System.Net.WebRequestMethods;
 
 namespace AzurePipelineTool.Commands;
 
 public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
 {
+    public enum ToolName
+    {
+        None,
+        AndroidSDKManager,
+        Butler,
+        CCache,
+        CMake,
+        Clang,
+        Gradle,
+        Ninja
+    }
+
     public FetchToolCommand() : base("fetch-tool", "Fetch tool (ninja, cmake, etc.)")
     {
     }
 
-    public enum ToolName
+    public override async Task HandleCommandAsync(Options options, CancellationToken cancellationToken)
     {
-        None,
-        Butler,
-        Ninja,
-        CMake,
-        CCache,
-        Clang
+        switch (options.Name)
+        {
+            case ToolName.AndroidSDKManager:
+                await FetchAndroidSDKManager(options, cancellationToken);
+                break;
+            case ToolName.Butler:
+                await FetchButler(options, cancellationToken);
+                break;
+            case ToolName.CCache:
+                await FetchCCache(options, cancellationToken);
+                break;
+            case ToolName.CMake:
+                await FetchCMake(options, cancellationToken);
+                break;
+            case ToolName.Clang:
+                await FetchClang(options, cancellationToken);
+                break;
+            case ToolName.Gradle:
+                await FetchGradle(options, cancellationToken);
+                break;
+            case ToolName.Ninja:
+                await FetchNinja(options, cancellationToken);
+                break;
+        }
     }
+
+    private async Task FetchAndroidSDKManager(Options options, CancellationToken cancellationToken)
+    {
+        var osVersionPlatform = PipelineUtils.GetPlatformId();
+
+        if (string.IsNullOrWhiteSpace(options.Version))
+            options.Version = "10406996";
+
+        var os = "win";
+        switch (osVersionPlatform)
+        {
+            case PlatformIdentifier.Windows:
+                os = "win";
+                break;
+            case PlatformIdentifier.Linux:
+                os = "linux";
+                break;
+            case PlatformIdentifier.MacOSX:
+                os = "mac";
+                break;
+        }
+
+        var url = $"https://dl.google.com/android/repository/commandlinetools-{os}-{options.Version}_latest.zip";
+        await new UnzipUrlCommand().HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
+        {
+            Temp = options.Temp,
+            Output = options.Output,
+            Overwrite = options.Overwrite,
+            Url = url,
+            ArchiveType = ArchiveType.zip
+        }, cancellationToken);
+
+        if (options.Path) PipelineUtils.PrepandPath("PATH", Path.GetFullPath(Path.Combine(options.Output, "cmdline-tools/bin/")));
+    }
+
 
     private static async Task FetchButler(Options options, CancellationToken cancellationToken)
     {
@@ -79,28 +141,6 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
         if (options.Path) PipelineUtils.PrepandPath("PATH", Path.GetFullPath(options.Output));
     }
 
-    public override async Task HandleCommandAsync(Options options, CancellationToken cancellationToken)
-    {
-        switch (options.Name)
-        {
-            case ToolName.Butler:
-                await FetchButler(options, cancellationToken);
-                break;
-            case ToolName.Ninja:
-                await FetchNinja(options, cancellationToken);
-                break;
-            case ToolName.CMake:
-                await FetchCMake(options, cancellationToken);
-                break;
-            case ToolName.CCache:
-                await FetchCCache(options, cancellationToken);
-                break;
-            case ToolName.Clang:
-                await FetchClang(options, cancellationToken);
-                break;
-        }
-    }
-
     private async Task FetchClang(Options options, CancellationToken cancellationToken)
     {
         var osVersionPlatform = PipelineUtils.GetPlatformId();
@@ -119,23 +159,29 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
                 switch (processArchitecture)
                 {
                     case Architecture.Arm64:
-                        url = $"https://github.com/llvm/llvm-project/releases/download/llvmorg-{options.Version}/clang+llvm-{options.Version}-aarch64-linux-gnu.tar.xz";
+                        url =
+                            $"https://github.com/llvm/llvm-project/releases/download/llvmorg-{options.Version}/clang+llvm-{options.Version}-aarch64-linux-gnu.tar.xz";
                         break;
                     case Architecture.X64:
-                        url = $"https://github.com/llvm/llvm-project/releases/download/llvmorg-{options.Version}/clang+llvm-{options.Version}-x86_64-unknown-linux-gnu-sles15.tar.xz";
+                        url =
+                            $"https://github.com/llvm/llvm-project/releases/download/llvmorg-{options.Version}/clang+llvm-{options.Version}-x86_64-unknown-linux-gnu-sles15.tar.xz";
                         break;
                 }
+
                 break;
             case PlatformIdentifier.MacOSX:
                 switch (processArchitecture)
                 {
                     case Architecture.Arm64:
-                        url = $"https://github.com/llvm/llvm-project/releases/download/llvmorg-{options.Version}/clang+llvm-{options.Version}-arm64-apple-darwin21.0.tar.xz";
+                        url =
+                            $"https://github.com/llvm/llvm-project/releases/download/llvmorg-{options.Version}/clang+llvm-{options.Version}-arm64-apple-darwin21.0.tar.xz";
                         break;
                     case Architecture.X64:
-                        url = $"https://github.com/llvm/llvm-project/releases/download/llvmorg-{options.Version}/clang+llvm-{options.Version}-x86_64-apple-darwin.tar.xz";
+                        url =
+                            $"https://github.com/llvm/llvm-project/releases/download/llvmorg-{options.Version}/clang+llvm-{options.Version}-x86_64-apple-darwin.tar.xz";
                         break;
                 }
+
                 break;
         }
 
@@ -173,6 +219,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
                 fileName = $"ccache-{options.Version}-linux-x86_64.tar.xz";
                 break;
         }
+
         var url = $"https://github.com/ccache/ccache/releases/download/v{options.Version}/{fileName}";
 
         await new UnzipUrlCommand().HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
@@ -184,7 +231,8 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
             ArchiveType = ArchiveType.auto
         }, cancellationToken);
 
-        PipelineUtils.PrepandPath("PATH", Path.Combine(Path.GetFullPath(options.Output), Path.GetFileNameWithoutExtension(fileName)));
+        PipelineUtils.PrepandPath("PATH",
+            Path.Combine(Path.GetFullPath(options.Output), Path.GetFileNameWithoutExtension(fileName)));
     }
 
     private async Task FetchCMake(Options options, CancellationToken cancellationToken)
@@ -250,6 +298,32 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
             else
                 PipelineUtils.PrepandPath("PATH",
                     Path.Combine(Path.GetFullPath(options.Output), $"cmake-{options.Version}-{os}-{arch}/bin"));
+        }
+    }
+
+    private async Task FetchGradle(Options options, CancellationToken cancellationToken)
+    {
+        var processArchitecture = RuntimeInformation.ProcessArchitecture;
+        var osVersionPlatform = PipelineUtils.GetPlatformId();
+
+        if (string.IsNullOrWhiteSpace(options.Version))
+            options.Version = "8.3";
+        var url = $"https://services.gradle.org/distributions/gradle-{options.Version}-bin.zip";
+        await new UnzipUrlCommand().HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
+        {
+            Temp = options.Temp,
+            Output = options.Output,
+            Overwrite = options.Overwrite,
+            Url = url,
+            ArchiveType = ArchiveType.zip
+        }, cancellationToken);
+
+        if (options.Path)
+        {
+            PipelineUtils.PrepandPath("PATH",
+                Path.Combine(Path.GetFullPath(options.Output), $"gradle-{options.Version}/bin"));
+            PipelineUtils.SetEnvironmentVariable("GRADLE_HOME",
+                Path.Combine(Path.GetFullPath(options.Output), $"gradle-{options.Version}"));
         }
     }
 

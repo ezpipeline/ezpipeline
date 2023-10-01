@@ -54,21 +54,6 @@ public class GitHeightVersionCommand : AbstractCommand<GitHeightVersionCommand.O
         var gitHeight = await Cli.Wrap("git").WithWorkingDirectory(workingDirectory).WithArguments(new[] { "rev-list", "--first-parent", "--count", $"{firstCommit}..HEAD" }).ExecuteBufferedAsync();
         var height = int.Parse(gitHeight.StandardOutput.Trim(), CultureInfo.InvariantCulture);
 
-        
-        Version version = new Version(0,0,1);
-        if (!string.IsNullOrWhiteSpace(options.BaseVersion))
-        {
-            version = Version.Parse(options.BaseVersion);
-        }
-        if (version.Revision >= 0)
-        {
-            version = new Version(version.Major, version.Minor, version.Build, version.Revision + height);
-        }
-        else
-        {
-            version = new Version(version.Major, version.Minor, version.Build + height);
-        }
-
         var branch = Environment.GetEnvironmentVariable("BUILD_SOURCEBRANCH");
         if (!string.IsNullOrEmpty(branch))
         {
@@ -83,14 +68,29 @@ public class GitHeightVersionCommand : AbstractCommand<GitHeightVersionCommand.O
             branch = gitBranch.StandardOutput.Trim();
         }
 
-        var gitCommit = await Cli.Wrap("git").WithWorkingDirectory(workingDirectory).WithArguments(new[] { "rev-parse", "--short", "HEAD"}).ExecuteBufferedAsync();
-        var commit = gitCommit.StandardOutput.Trim();
+        string stringVersion = height.ToString(CultureInfo.InvariantCulture);
 
-        var isMain = new Regex(options.Main).Match(branch).Success;
+        if (!string.IsNullOrWhiteSpace(options.BaseVersion))
+        {
+            Version version = Version.Parse(options.BaseVersion);
+            if (version.Revision >= 0)
+            {
+                version = new Version(version.Major, version.Minor, version.Build, version.Revision + height);
+            }
+            else
+            {
+                version = new Version(version.Major, version.Minor, version.Build + height);
+            }
 
-        var stringVersion = version.ToString();
-        if (!isMain)
-            stringVersion = stringVersion + "-alpha" + commit;
+            var gitCommit = await Cli.Wrap("git").WithWorkingDirectory(workingDirectory).WithArguments(new[] { "rev-parse", "--short", "HEAD" }).ExecuteBufferedAsync();
+            var commit = gitCommit.StandardOutput.Trim();
+
+            var isMain = new Regex(options.Main).Match(branch).Success;
+
+            stringVersion = version.ToString();
+            if (!isMain)
+                stringVersion = stringVersion + "-alpha" + commit;
+        }
 
         Console.WriteLine(stringVersion);
         PipelineUtils.SetEnvironmentVariable(options.Variable, stringVersion);
