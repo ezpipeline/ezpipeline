@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Runtime.InteropServices;
+using System.Text;
 
 namespace PipelineTools;
 
@@ -194,5 +195,34 @@ public static class PipelineUtils
         if (File.Exists(tempFileName)) File.Delete(tempFileName);
 
         return tempFileName;
+    }
+
+    public static void MakeExecutable(string binFile)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return;
+        }
+#if NET7_0_OR_GREATER
+        foreach (var resolvePath in ResolvePaths(binFile))
+        {
+            if (File.Exists(resolvePath))
+            {
+                var mode = File.GetUnixFileMode(resolvePath);
+                var newmode = mode | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute | UnixFileMode.UserExecute;
+                if (newmode != mode)
+                {
+                    File.SetUnixFileMode(resolvePath, mode);
+                    Console.WriteLine($"File {resolvePath} is executable now");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"File {resolvePath} not found");
+            }
+        }
+#else
+            Console.WriteLine("Changing file mode only available in NET7.0 and newer");
+#endif
     }
 }
