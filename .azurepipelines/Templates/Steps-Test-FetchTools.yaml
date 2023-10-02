@@ -27,12 +27,9 @@ steps:
 
   - pwsh: |
       echo $env:Path
-      if ($IsWindows) {
-          $output = cmake --version | Select-Object -First 1
-      } else {
-          $output = cmake --version 2>&1 | head -n 1
-      }
+      $output = cmake --version
       Write-Host $output
+      $output = $variable | Select-Object -First 1
       $expected = "cmake version 3.27.6"
       if (-not $output.StartsWith($expected)) {
           Write-Error "Output $output does not match expected value $expected."
@@ -49,12 +46,9 @@ steps:
 
   - pwsh: |
       echo $env:Path
-      if ($IsWindows) {
-          $output = cmake --version | Select-Object -First 1
-      } else {
-          $output = cmake --version 2>&1 | head -n 1
-      }
+      $output = cmake --version
       Write-Host $output
+      $output = $variable | Select-Object -First 1
       $expected = "cmake version 3.19.7"
       if (-not $output.StartsWith($expected)) {
           Write-Error "Output $output does not match expected value $expected."
