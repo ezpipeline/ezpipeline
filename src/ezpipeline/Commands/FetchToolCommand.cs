@@ -326,7 +326,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
             _environment.PrepandPath("PATH", bindFolder);
         }
 
-        PipelineUtils.MakeExecutable(Path.Combine(bindFolder, "cmake"));
+        PipelineUtils.MakeExecutable(Path.Combine(bindFolder, "*"));
     }
 
     private async Task FetchGradle(Options options, CancellationToken cancellationToken)

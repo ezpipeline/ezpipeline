@@ -212,7 +212,7 @@ public static class PipelineUtils
                 var newmode = mode | UnixFileMode.GroupExecute | UnixFileMode.OtherExecute | UnixFileMode.UserExecute;
                 if (newmode != mode)
                 {
-                    File.SetUnixFileMode(resolvePath, mode);
+                    File.SetUnixFileMode(resolvePath, newmode);
                     Console.WriteLine($"File {resolvePath} is executable now");
                 }
             }
@@ -222,7 +222,7 @@ public static class PipelineUtils
             }
         }
 #else
-            Console.WriteLine("Changing file mode only available in NET7.0 and newer");
+        Console.WriteLine("Changing file mode only available in NET7.0 and newer");
 #endif
     }
 }
