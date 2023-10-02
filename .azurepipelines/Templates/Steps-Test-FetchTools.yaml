@@ -21,22 +21,6 @@ steps:
     displayName: Run Ninja
 
   - script: |
-      dotnet ezpipeline.dll fetch-tool -n CMake -o $(Build.SourcesDirectory)/tools/ --path --version 3.27.6
-    workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net6.0/any/
-    displayName: Fetch CMake
-
-  - bash: |
-      echo $PATH
-      output=$(cmake --version)
-      echo $output
-      if [[ $output != "cmake version 3.27.6"* ]]; then
-          exit 1
-      fi
-    workingDirectory: $(Build.SourcesDirectory)
-    displayName: Run CMake 3.27.6
-
-
-  - script: |
       dotnet ezpipeline.dll fetch-tool -n CMake -o $(Build.SourcesDirectory)/tools/ --path --version 3.19.7
     workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net6.0/any/
     displayName: Fetch CMake
@@ -50,4 +34,19 @@ steps:
       fi
     workingDirectory: $(Build.SourcesDirectory)
     displayName: Run CMake 3.19.7
+
+  - script: |
+      dotnet ezpipeline.dll fetch-tool -n CMake -o $(Build.SourcesDirectory)/tools/ --path --version 3.27.6
+    workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net6.0/any/
+    displayName: Fetch CMake
+
+  - bash: |
+      echo $PATH
+      output=$(cmake --version)
+      echo $output
+      if [[ $output != "cmake version 3.27.6"* ]]; then
+          exit 1
+      fi
+    workingDirectory: $(Build.SourcesDirectory)
+    displayName: Run CMake 3.27.6
 
