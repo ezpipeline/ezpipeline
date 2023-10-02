@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.IO;
+using System.Runtime.InteropServices;
 using Mono.Unix;
 using PipelineTools;
 
@@ -302,30 +303,30 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
             ArchiveType = archiveType
         }, cancellationToken);
 
+        string bindFolder;
+        if (osVersionPlatform == PlatformIdentifier.MacOSX)
+        {
+            bindFolder = Path.Combine(Path.GetFullPath(options.Output), $"cmake-{options.Version}-{os}-{arch}/CMake.app/Contents/bin");
+        }
+        else if (osVersionPlatform == PlatformIdentifier.Linux)
+        {
+            bindFolder = Path.Combine(Path.GetFullPath(options.Output),
+                $"cmake-{options.Version}-Linux-{arch}/bin");
+            if (!Directory.Exists(bindFolder))
+                bindFolder = Path.Combine(Path.GetFullPath(options.Output),
+                    $"cmake-{options.Version}-linux-{arch}/bin");
+        }
+        else
+        {
+            bindFolder = Path.Combine(Path.GetFullPath(options.Output), $"cmake-{options.Version}-{os}-{arch}/bin");
+        }
+
         if (options.Path)
         {
-            if (osVersionPlatform == PlatformIdentifier.MacOSX)
-            {
-                _environment.PrepandPath("PATH",
-                    Path.Combine(Path.GetFullPath(options.Output),
-                        $"cmake-{options.Version}-{os}-{arch}/CMake.app/Contents/bin"));
-            }
-            else if (osVersionPlatform == PlatformIdentifier.Linux)
-            {
-                var pathOption = Path.Combine(Path.GetFullPath(options.Output),
-                    $"cmake-{options.Version}-Linux-{arch}/bin");
-                if (!Directory.Exists(pathOption))
-                    pathOption = Path.Combine(Path.GetFullPath(options.Output),
-                        $"cmake-{options.Version}-linux-{arch}/bin");
-
-                _environment.PrepandPath("PATH", pathOption);
-            }
-            else
-            {
-                _environment.PrepandPath("PATH",
-                    Path.Combine(Path.GetFullPath(options.Output), $"cmake-{options.Version}-{os}-{arch}/bin"));
-            }
+            _environment.PrepandPath("PATH", bindFolder);
         }
+
+        PipelineUtils.MakeExecutable(Path.Combine(bindFolder, "cmake"));
     }
 
     private async Task FetchGradle(Options options, CancellationToken cancellationToken)
