@@ -6,6 +6,6 @@ steps:
     displayName: Build ezpipeline
 
   - script: |
-      dotnet test -f net7.0
+      dotnet test
     workingDirectory: $(Build.SourcesDirectory)/src/ezpipeline.UnitTests
     displayName: Run unit tests
