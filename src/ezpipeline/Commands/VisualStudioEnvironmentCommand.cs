@@ -5,26 +5,30 @@ namespace AzurePipelineTool.Commands;
 
 public class VisualStudioEnvironmentCommand : AbstractCommand<VisualStudioEnvironmentOptions>
 {
-    public VisualStudioEnvironmentCommand() : base("vsenv", "Setup VisualStudio environment variables")
+    private readonly IPlatformEnvironment _environment;
+
+    public VisualStudioEnvironmentCommand(IPlatformEnvironment environment) : base("vsenv",
+        "Setup VisualStudio environment variables")
     {
+        _environment = environment;
     }
 
     public override async Task HandleCommandAsync(VisualStudioEnvironmentOptions options,
         CancellationToken cancellationToken)
     {
-        if (PipelineUtils.GetPlatformId() != PlatformIdentifier.Windows)
+        if (_environment.GetPlatformId() != PlatformIdentifier.Windows)
         {
-            Console.Error.WriteLine($"Can't setup VS on {Environment.OSVersion}");
+            _environment.WriteErrorLine($"Can't setup VS on {Environment.OSVersion}");
             return;
         }
 
         var vsLocation = RunProcess(@"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe", "-latest",
             "-property", "installationPath");
-        Console.WriteLine($"Visual Studio found at: {vsLocation}");
+        _environment.WriteLine($"Visual Studio found at: {vsLocation}");
 
         var toolsVersion = File
             .ReadAllText(Path.Combine(vsLocation, @"VC\Auxiliary\Build\Microsoft.VCToolsVersion.default.txt")).Trim();
-        PipelineUtils.SetEnvironmentVariable("MSVC_TOOLS_VERSION", toolsVersion);
+        _environment.SetEnvironmentVariable("MSVC_TOOLS_VERSION", toolsVersion);
 
         var toolsFolder = Path.Combine(vsLocation, @"VC\Tools\MSVC", toolsVersion);
 
@@ -48,16 +52,16 @@ public class VisualStudioEnvironmentCommand : AbstractCommand<VisualStudioEnviro
             Path.Combine(vsLocation, @"Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja"),
             Path.Combine(vsLocation, @"Common7\IDE\VC\Linux\bin\ConnectionManagerExe")
         };
-        PipelineUtils.PrepandPath("PATH", string.Join(Path.PathSeparator, pathsToAdd));
+        _environment.PrepandPath("PATH", string.Join(Path.PathSeparator, pathsToAdd));
 
         var include = Path.Combine(toolsFolder, @"include");
         var atlmfcInclude = Path.Combine(toolsFolder, @"atlmfc\include");
-        PipelineUtils.PrepandPath("INCLUDE", $"{include}{Path.PathSeparator}{atlmfcInclude}");
+        _environment.PrepandPath("INCLUDE", $"{include}{Path.PathSeparator}{atlmfcInclude}");
 
 
         var lib = Path.Combine(toolsFolder, @"lib", buildPlatform);
         var atlmfcLib = Path.Combine(toolsFolder, @"atlmfc\lib", buildPlatform);
-        PipelineUtils.PrepandPath("LIB", $"{lib}{Path.PathSeparator}{atlmfcLib}");
+        _environment.PrepandPath("LIB", $"{lib}{Path.PathSeparator}{atlmfcLib}");
     }
 
     public class VisualStudioEnvironmentOptions

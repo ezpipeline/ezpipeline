@@ -1,26 +1,10 @@
-﻿using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Text;
 
 namespace PipelineTools;
 
 public static class PipelineUtils
 {
     public static Encoding UTF8 = new UTF8Encoding(false);
-
-    public static PlatformIdentifier GetPlatformId()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            return PlatformIdentifier.MacOSX;
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            return PlatformIdentifier.Windows;
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            return PlatformIdentifier.Linux;
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD))
-            return PlatformIdentifier.FreeBSD;
-
-        return PlatformIdentifier.Unknown;
-    }
 
     public static IEnumerable<string> ResolvePaths(string path)
     {
@@ -35,7 +19,7 @@ public static class PipelineUtils
         var nextFolders = new HashSet<string>();
 
         var segments = path.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);
-        
+
         if (path.StartsWith('\\') || path.StartsWith('/'))
             lookUpFolders.Add(path.Substring(0, 1));
         else
@@ -44,38 +28,26 @@ public static class PipelineUtils
         for (var index = 0; index < segments.Length && lookUpFolders.Count > 0; index++)
         {
             var segment = segments[index];
-            bool isLastSegment = index == segments.Length - 1;
+            var isLastSegment = index == segments.Length - 1;
             if (segment == "**")
             {
                 foreach (var folder in lookUpFolders)
                 {
                     nextFolders.Add(folder);
                     foreach (var dir in Directory.GetDirectories(folder, "*", SearchOption.AllDirectories))
-                    {
                         nextFolders.Add(dir + Path.DirectorySeparatorChar);
-                    }
                 }
             }
             else if (segment.Contains('*') || segment.Contains('?'))
             {
                 if (isLastSegment)
-                {
                     foreach (var folder in lookUpFolders)
-                    {
-                        foreach (var file in Directory.GetFiles(folder, segment))
-                        {
-                            yield return file;
-                        }
-                    }
-                }
+                    foreach (var file in Directory.GetFiles(folder, segment))
+                        yield return file;
 
                 foreach (var folder in lookUpFolders)
-                {
-                    foreach (var subdir in Directory.GetDirectories(folder, segment))
-                    {
-                        nextFolders.Add(subdir + Path.DirectorySeparatorChar);
-                    }
-                }
+                foreach (var subdir in Directory.GetDirectories(folder, segment))
+                    nextFolders.Add(subdir + Path.DirectorySeparatorChar);
             }
             else
             {
@@ -93,22 +65,18 @@ public static class PipelineUtils
             nextFolders.Clear();
         }
 
-        foreach (var lookUpFolder in lookUpFolders)
-        {
-            yield return lookUpFolder;
-        }
+        foreach (var lookUpFolder in lookUpFolders) yield return lookUpFolder;
     }
 
     public static string ResolvePath(string path)
     {
-        bool hasResult = false;
-        string result = Path.GetFullPath(path);
+        var hasResult = false;
+        var result = Path.GetFullPath(path);
         foreach (var resolvedPath in ResolvePaths(path).Distinct())
         {
             if (hasResult)
-            {
-                throw new Exception($"Can't resolve path {path} because of multiple options: {result}, {resolvedPath}...");
-            }
+                throw new Exception(
+                    $"Can't resolve path {path} because of multiple options: {result}, {resolvedPath}...");
 
             result = resolvedPath;
         }
@@ -133,66 +101,64 @@ public static class PipelineUtils
         return File.Open(ResolvePath(fileName), FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
     }
 
-    private static Stream AppendFile(string fileName)
+    public static Stream AppendFile(string fileName)
     {
         return File.Open(ResolvePath(fileName), FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
     }
 
-
-    public static void SetEnvironmentVariable(string envName, string value)
+    public static bool ValidateDirectory(IPlatformEnvironment environment, string path)
     {
-        if (string.IsNullOrWhiteSpace(envName))
-            return;
+        var fullPath = Path.GetFullPath(path);
+        if (Directory.Exists(fullPath))
+            return true;
 
-        Console.WriteLine($"Setting environment variable {envName} to {value}");
-        Environment.SetEnvironmentVariable(envName, value, EnvironmentVariableTarget.Process);
-        var githubEnv = Environment.GetEnvironmentVariable("GITHUB_ENV");
-        if (string.IsNullOrWhiteSpace(githubEnv))
+        path = fullPath;
+        for (;;)
         {
-            Console.WriteLine($"##vso[task.setvariable variable={envName}]{value}");
-        }
-        else
-        {
-            using (var file = AppendFile(githubEnv))
+            var parent = Path.GetDirectoryName(fullPath);
+            if (string.IsNullOrWhiteSpace(parent)) break;
+
+            if (Directory.Exists(parent))
             {
-                using (var writer = new StreamWriter(file, UTF8))
-                {
-                    writer.WriteLine($"{envName}={value}");
-                }
+                var options = string.Join(", ", Directory.GetDirectories(parent).Select(Path.GetFileName));
+                environment.WriteErrorLine(
+                    $"Path not found: \"{path}\", missing \"{Path.GetFileName(fullPath)}\", available {options}");
+                return false;
             }
+
+            fullPath = parent;
         }
+
+        environment.WriteErrorLine($"Path not found: \"{path}\"");
+
+        return false;
     }
 
-    public static void PrepandPath(string envName, string value)
+    public static void PrepandPath(this IPlatformEnvironment environment, string envName, string value)
     {
         if (string.IsNullOrWhiteSpace(value))
             return;
-        var existingValue = Environment.GetEnvironmentVariable(envName);
-        var a = Environment.GetEnvironmentVariables();
+        var existingValue = environment.GetEnvironmentVariable(envName);
         var visitedPath = new HashSet<string>();
         var combinedPaths = new List<string>();
 
         foreach (var s in value.Split(Path.PathSeparator).Where(_ => !string.IsNullOrWhiteSpace(_)))
-            if (!Directory.Exists(s))
-            {
-                Console.Error.WriteLine($"Path not found: \"{s}\"");
-            }
-            else if (visitedPath.Add(s))
-            {
-                combinedPaths.Add(s);
-                //Console.WriteLine($"{envName}: Adding path \"{s}\"");
-            }
+        {
+            var fullPath = Path.GetFullPath(s);
+            if (ValidateDirectory(environment, fullPath))
+                if (visitedPath.Add(s))
+                    combinedPaths.Add(s);
+                //_environment.WriteLine($"{envName}: Adding path \"{s}\"");
+        }
 
         if (!string.IsNullOrWhiteSpace(existingValue))
             foreach (var s in existingValue.Split(Path.PathSeparator).Where(_ => !string.IsNullOrWhiteSpace(_)))
                 if (visitedPath.Add(s))
-                {
                     combinedPaths.Add(s);
-                    //Console.WriteLine($"{envName}: Existing path \"{s}\"");
-                }
+                //_environment.WriteLine($"{envName}: Existing path \"{s}\"");
 
         var newValue = string.Join(Path.PathSeparator, combinedPaths);
-        SetEnvironmentVariable(envName, newValue);
+        environment.SetEnvironmentVariable(envName, newValue);
     }
 
     public static string GetTempFileName(string? optionsTemp)

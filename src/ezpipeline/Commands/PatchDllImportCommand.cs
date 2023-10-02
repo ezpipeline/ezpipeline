@@ -5,8 +5,12 @@ namespace AzurePipelineTool.Commands;
 
 public class PatchDllImportCommand : AbstractCommand<PatchDllImportCommand.PatchDllImportOptions>
 {
-    public PatchDllImportCommand() : base("patch-dllimport", "Patch dllimport in an assembly bytecode")
+    private readonly IPlatformEnvironment _environment;
+
+    public PatchDllImportCommand(IPlatformEnvironment environment) : base("patch-dllimport",
+        "Patch dllimport in an assembly bytecode")
     {
+        _environment = environment;
     }
 
     public override async Task HandleCommandAsync(PatchDllImportOptions options, CancellationToken cancellationToken)
@@ -15,7 +19,7 @@ public class PatchDllImportCommand : AbstractCommand<PatchDllImportCommand.Patch
         if (string.IsNullOrWhiteSpace(options.Input)) throw new ArgumentException("Missing --input argument");
 
         var inputFullPath = Path.GetFullPath(fileName);
-        Console.WriteLine($"Reading {inputFullPath}");
+        _environment.WriteLine($"Reading {inputFullPath}");
 
         var assembly = AssemblyDefinition.ReadAssembly(inputFullPath);
         var moduleName = options.NewValue;
@@ -25,12 +29,12 @@ public class PatchDllImportCommand : AbstractCommand<PatchDllImportCommand.Patch
         foreach (var methodDefinition in typeDefinition.Methods)
             if (methodDefinition.PInvokeInfo != null)
             {
-                Console.WriteLine($"Patching {methodDefinition.DeclaringType.Name}.{methodDefinition.Name}(...)");
+                _environment.WriteLine($"Patching {methodDefinition.DeclaringType.Name}.{methodDefinition.Name}(...)");
                 methodDefinition.PInvokeInfo.Module.Name = moduleName;
             }
 
         var outputFullPath = Path.GetFullPath(options.Output);
-        Console.WriteLine($"Writing {outputFullPath}");
+        _environment.WriteLine($"Writing {outputFullPath}");
         Directory.CreateDirectory(Path.GetDirectoryName(outputFullPath));
         assembly.Write(outputFullPath);
     }

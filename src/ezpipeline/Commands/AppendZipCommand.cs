@@ -6,11 +6,16 @@ namespace AzurePipelineTool.Commands;
 
 public class AppendZipCommand : AbstractCommand<AppendZipCommand.ZipOptions>
 {
-    public AppendZipCommand() : base("append-zip", "Append folder or file into existing .zip file")
+    private readonly IPlatformEnvironment _environment;
+
+    public AppendZipCommand(IPlatformEnvironment environment) : base("append-zip",
+        "Append folder or file into existing .zip file")
     {
+        _environment = environment;
     }
 
-    public static void DoZip(Stream fileStream, string input, string subfolder, ZipArchiveMode mode, string? filterPattern, CompressionLevel compressionLevel)
+    public static void DoZip(IPlatformEnvironment environment, Stream fileStream, string input, string subfolder,
+        ZipArchiveMode mode, string? filterPattern, CompressionLevel compressionLevel)
     {
         //if ((i.Attributes & FileAttributes.Directory) != 0)
         //{
@@ -32,21 +37,20 @@ public class AppendZipCommand : AbstractCommand<AppendZipCommand.ZipOptions>
         var searchPattern = "*";
         using (var archive = new ZipArchive(fileStream, mode, false))
         {
-            var existingEntries = (mode == ZipArchiveMode.Update) ? new HashSet<string>(archive.Entries.Select(_ => _.FullName.Replace('\\','/'))) : new HashSet<string>();
+            var existingEntries = mode == ZipArchiveMode.Update
+                ? new HashSet<string>(archive.Entries.Select(_ => _.FullName.Replace('\\', '/')))
+                : new HashSet<string>();
 
             foreach (var file in di.EnumerateFileSystemInfos(searchPattern, SearchOption.AllDirectories))
             {
                 var entryName = subfolder + EntryFromPath(file.FullName, basePath);
-                if (file is DirectoryInfo)
-                {
-                    entryName += "/";
-                }
+                if (file is DirectoryInfo) entryName += "/";
 
                 if (!existingEntries.Contains(entryName))
                 {
                     if (filter != null && !filter.IsMatch(entryName))
                     {
-                        Console.WriteLine($"Skipping {entryName}: does not match {filterPattern}");
+                        environment.WriteLine($"Skipping {entryName}: does not match {filterPattern}");
                         continue;
                     }
 
@@ -54,7 +58,7 @@ public class AppendZipCommand : AbstractCommand<AppendZipCommand.ZipOptions>
                     {
                         // Create entry for file:
                         archive.CreateEntryFromFile(file.FullName, entryName, compressionLevel);
-                        Console.WriteLine($"{entryName}");
+                        environment.WriteLine($"{entryName}");
                     }
                     else
                     {
@@ -62,13 +66,13 @@ public class AppendZipCommand : AbstractCommand<AppendZipCommand.ZipOptions>
                         if (file is DirectoryInfo possiblyEmpty && !possiblyEmpty.EnumerateFileSystemInfos().Any())
                         {
                             archive.CreateEntry(entryName);
-                            Console.WriteLine(entryName);
+                            environment.WriteLine(entryName);
                         }
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"Skipping {entryName}: already exists in archive");
+                    environment.WriteLine($"Skipping {entryName}: already exists in archive");
                 }
             }
         }
@@ -101,19 +105,17 @@ public class AppendZipCommand : AbstractCommand<AppendZipCommand.ZipOptions>
         var compressionLevel = options.CompressionLevel;
 
         if (File.Exists(output))
-        {
             using (var fileStream = PipelineUtils.OpenOrCreateFile(output))
             {
-                DoZip(fileStream, input, subfolder, ZipArchiveMode.Update, filterPattern, compressionLevel);
+                DoZip(_environment, fileStream, input, subfolder, ZipArchiveMode.Update, filterPattern,
+                    compressionLevel);
             }
-        }
         else
-        {
             using (var fileStream = PipelineUtils.CreateFile(output))
             {
-                DoZip(fileStream, input, subfolder, ZipArchiveMode.Create, filterPattern, compressionLevel);
+                DoZip(_environment, fileStream, input, subfolder, ZipArchiveMode.Create, filterPattern,
+                    compressionLevel);
             }
-        }
 
         return Task.CompletedTask;
     }

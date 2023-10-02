@@ -8,9 +8,12 @@ namespace AzurePipelineTool.Commands;
 
 public class XCodeSetBuildSystemTypeCommand : AbstractCommand<XCodeSetBuildSystemTypeOptions>
 {
-    public XCodeSetBuildSystemTypeCommand() : base("xcode-setbuildsystemtype",
+    private readonly IPlatformEnvironment _environment;
+
+    public XCodeSetBuildSystemTypeCommand(IPlatformEnvironment environment) : base("xcode-setbuildsystemtype",
         "Patch XCode build system workspace property")
     {
+        _environment = environment;
     }
 
     public override async Task HandleCommandAsync(XCodeSetBuildSystemTypeOptions options,
@@ -22,7 +25,7 @@ public class XCodeSetBuildSystemTypeCommand : AbstractCommand<XCodeSetBuildSyste
         foreach (var file in Directory.GetFiles(xcodeProjectDir, "WorkspaceSettings.xcsettings",
                      SearchOption.AllDirectories))
         {
-            Console.WriteLine($"Patching {file}");
+            _environment.WriteLine($"Patching {file}");
             var xmlText = await File.ReadAllTextAsync(file);
             try
             {
@@ -30,8 +33,8 @@ public class XCodeSetBuildSystemTypeCommand : AbstractCommand<XCodeSetBuildSyste
             }
             catch (XmlException ex)
             {
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine(xmlText);
+                _environment.WriteErrorLine(ex.Message);
+                _environment.WriteErrorLine(xmlText);
                 return;
             }
         }

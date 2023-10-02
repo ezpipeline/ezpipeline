@@ -19,6 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Autofac" Version="7.1.0" />
 		<PackageReference Include="Azure.Storage.Blobs" Version="12.18.0" />
 		<PackageReference Include="CliWrap" Version="3.6.4" />
 		<PackageReference Include="Discord.Net.Webhook" Version="3.12.0" />

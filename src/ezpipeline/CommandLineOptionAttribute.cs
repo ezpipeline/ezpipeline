@@ -19,7 +19,7 @@ public class CommandLineOptionAttribute : Attribute
 
     public Option MakeOption(PropertyInfo property)
     {
-        string?[] aliases = new[] { "--" + DeCamel(property.Name), _alias }.Where(_ => !string.IsNullOrWhiteSpace(_))
+        var aliases = new[] { "--" + DeCamel(property.Name), _alias }.Where(_ => !string.IsNullOrWhiteSpace(_))
             .ToArray();
         var optionType = property.PropertyType;
         var genericType = typeof(Option<>).MakeGenericType(optionType);

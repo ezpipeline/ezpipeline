@@ -5,16 +5,20 @@ namespace AzurePipelineTool.Commands;
 
 public class WindowsSdkEnvironmentCommand : AbstractCommand<WindowsSdkEnvironmentOptions>
 {
-    public WindowsSdkEnvironmentCommand() : base("winsdkenv", "Setup WindowsSDK environment variables")
+    private readonly IPlatformEnvironment _environment;
+
+    public WindowsSdkEnvironmentCommand(IPlatformEnvironment environment) : base("winsdkenv",
+        "Setup WindowsSDK environment variables")
     {
+        _environment = environment;
     }
 
     public override async Task HandleCommandAsync(WindowsSdkEnvironmentOptions options,
         CancellationToken cancellationToken)
     {
-        if (PipelineUtils.GetPlatformId() != PlatformIdentifier.Windows)
+        if (_environment.GetPlatformId() != PlatformIdentifier.Windows)
         {
-            Console.Error.WriteLine($"Can't setup VS on {Environment.OSVersion}");
+            _environment.WriteErrorLine($"Can't setup VS on {Environment.OSVersion}");
             return;
         }
 
@@ -22,9 +26,9 @@ public class WindowsSdkEnvironmentCommand : AbstractCommand<WindowsSdkEnvironmen
 
         var baseNetFxPath = @"C:\Program Files (x86)\Windows Kits\NETFXSDK";
         var netFxSdkFolder = Directory.GetDirectories(baseNetFxPath).OrderByDescending(_ => _).FirstOrDefault();
-        PipelineUtils.PrepandPath("INCLUDE",
+        _environment.PrepandPath("INCLUDE",
             string.Join(Path.PathSeparator, Directory.GetDirectories(Path.Combine(netFxSdkFolder, @"Include\um"))));
-        PipelineUtils.PrepandPath("LIB",
+        _environment.PrepandPath("LIB",
             string.Join(Path.PathSeparator,
                 Directory.GetDirectories(Path.Combine(netFxSdkFolder, @"Lib\um", buildPlatform))));
 
@@ -34,23 +38,23 @@ public class WindowsSdkEnvironmentCommand : AbstractCommand<WindowsSdkEnvironmen
             .FirstOrDefault();
 
         var sdkVersion = Path.GetFileName(sdkFolder);
-        PipelineUtils.SetEnvironmentVariable("WINDOWS_SDK_VERSION", sdkVersion);
+        _environment.SetEnvironmentVariable("WINDOWS_SDK_VERSION", sdkVersion);
 
         var pathsToAdd = new List<string>
         {
             Path.Combine(basePath, @"bin", sdkVersion, buildPlatform),
             Path.Combine(basePath, @"bin", buildPlatform)
         };
-        PipelineUtils.PrepandPath("PATH", string.Join(Path.PathSeparator, pathsToAdd));
+        _environment.PrepandPath("PATH", string.Join(Path.PathSeparator, pathsToAdd));
 
 
         var includeFolder = Path.Combine(basePath, "Include", sdkVersion);
-        PipelineUtils.PrepandPath("INCLUDE", string.Join(Path.PathSeparator, Directory.GetDirectories(includeFolder)));
+        _environment.PrepandPath("INCLUDE", string.Join(Path.PathSeparator, Directory.GetDirectories(includeFolder)));
 
         var libFolder = Path.Combine(basePath, "Lib", sdkVersion);
         var umLib = Path.Combine(libFolder, @"um", buildPlatform);
         var ucrtLib = Path.Combine(libFolder, @"ucrt", buildPlatform);
-        PipelineUtils.PrepandPath("LIB", $"{umLib}{Path.PathSeparator}{ucrtLib}");
+        _environment.PrepandPath("LIB", $"{umLib}{Path.PathSeparator}{ucrtLib}");
     }
 
     public class WindowsSdkEnvironmentOptions

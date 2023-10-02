@@ -21,11 +21,35 @@ steps:
     displayName: Run Ninja
 
   - script: |
-      dotnet ezpipeline.dll fetch-tool -n CMake -o $(Build.SourcesDirectory)/tools/ --path
+      dotnet ezpipeline.dll fetch-tool -n CMake -o $(Build.SourcesDirectory)/tools/ --path --version 3.27.6
     workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net6.0/any/
     displayName: Fetch CMake
 
-  - script: |
-      cmake --version
+  - pwsh: |
+      $output = cmake --version | Select-Object -First 1
+      Write-Host $output
+      $expected = "cmake version 3.27.6"
+      if (-not $output.StartsWith($expected)) {
+          Write-Error "Output $output does not match expected value $expected."
+          exit 1
+      }
     workingDirectory: $(Build.SourcesDirectory)
     displayName: Run CMake
+
+
+  - script: |
+      dotnet ezpipeline.dll fetch-tool -n CMake -o $(Build.SourcesDirectory)/tools/ --path --version 3.19.7
+    workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net6.0/any/
+    displayName: Fetch CMake
+
+  - pwsh: |
+      $output = cmake --version | Select-Object -First 1
+      Write-Host $output
+      $expected = "cmake version 3.19.7"
+      if (-not $output.StartsWith($expected)) {
+          Write-Error "Output $output does not match expected value $expected."
+          exit 1
+      }
+    workingDirectory: $(Build.SourcesDirectory)
+    displayName: Run CMake
+

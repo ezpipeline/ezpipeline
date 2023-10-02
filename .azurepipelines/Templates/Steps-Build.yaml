@@ -4,3 +4,8 @@ steps:
       dotnet publish -f net7.0 $(Build.SourcesDirectory)/src/ezpipeline/ezpipeline.csproj -o $(Build.SourcesDirectory)/nuget/tools/net7.0/any/ -c Release
     workingDirectory: $(Build.SourcesDirectory)
     displayName: Build ezpipeline
+
+  - script: |
+      dotnet test -f net7.0
+    workingDirectory: $(Build.SourcesDirectory)/src/ezpipeline.UnitTests
+    displayName: Run unit tests

@@ -7,8 +7,11 @@ namespace AzurePipelineTool.Commands;
 
 public class GetCPUInfoCommand : AbstractCommand<GetNumberOfProcessorsOptions>
 {
-    public GetCPUInfoCommand() : base("cpu-info", "Get CPU info")
+    private readonly IPlatformEnvironment _environment;
+
+    public GetCPUInfoCommand(IPlatformEnvironment environment) : base("cpu-info", "Get CPU info")
     {
+        _environment = environment;
     }
 
     public enum CpuInfo
@@ -31,8 +34,8 @@ public class GetCPUInfoCommand : AbstractCommand<GetNumberOfProcessorsOptions>
                 break;
         }
 
-        Console.WriteLine(result);
-        PipelineUtils.SetEnvironmentVariable(options.Variable, result);
+        _environment.WriteLine(result);
+        _environment.SetEnvironmentVariable(options.Variable, result);
         return Task.CompletedTask;
     }
 

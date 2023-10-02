@@ -5,13 +5,16 @@ namespace AzurePipelineTool.Commands;
 
 public class UnzipUrlCommand : AbstractCommand<UnzipUrlCommand.UnzipUrlOptions>
 {
-    public UnzipUrlCommand() : base("unzip-url", "Unarchive content of a web file")
+    private readonly IPlatformEnvironment _environment;
+
+    public UnzipUrlCommand(IPlatformEnvironment environment) : base("unzip-url", "Unarchive content of a web file")
     {
+        _environment = environment;
     }
 
     public override async Task HandleCommandAsync(UnzipUrlOptions options, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"Downloading {options.Url} to {options.Output}");
+        _environment.WriteLine($"Downloading {options.Url} to {options.Output}");
         var tempFileName = PipelineUtils.GetTempFileName(options.Temp);
         try
         {

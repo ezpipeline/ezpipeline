@@ -6,5 +6,5 @@ public enum PlatformIdentifier
     Windows,
     Linux,
     FreeBSD,
-    MacOSX,
+    MacOSX
 }

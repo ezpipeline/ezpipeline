@@ -7,8 +7,8 @@ stages:
 - stage: Build_And_Test
   displayName: Build And Test
   jobs:
-  - job: Test_Butler
-    displayName: 'Test Butler'
+  - job: Build
+    displayName: 'Build and test'
     strategy:
       matrix:
         linux:

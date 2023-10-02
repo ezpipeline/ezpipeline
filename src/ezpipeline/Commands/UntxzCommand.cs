@@ -31,13 +31,13 @@ public class UntxzCommand : AbstractCommand<UntxzCommand.Options>
 
             decoder.SetDecoderProperties(properties2);
 
-            long compressedSize = strmInStream.Length - strmInStream.Position;
+            var compressedSize = strmInStream.Length - strmInStream.Position;
             var strmOutStream = new MemoryStream();
             decoder.Code(strmInStream, strmOutStream, compressedSize, outSize, null);
             strmOutStream.Flush();
             strmOutStream.Position = 0;
 
-            using TarArchive tarArchive = TarArchive.CreateInputTarArchive(strmOutStream, PipelineUtils.UTF8);
+            using var tarArchive = TarArchive.CreateInputTarArchive(strmOutStream, PipelineUtils.UTF8);
             tarArchive.SetKeepOldFiles(!options.Overwrite);
             if (!string.IsNullOrWhiteSpace(options.RootPath))
                 tarArchive.RootPath = options.RootPath;

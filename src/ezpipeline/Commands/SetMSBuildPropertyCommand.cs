@@ -6,7 +6,8 @@ namespace AzurePipelineTool.Commands;
 
 public class SetMSBuildPropertyCommand : AbstractCommand<SetMSBuildPropertyCommand.Options>
 {
-    public SetMSBuildPropertyCommand() : base("set-msbuild-property", "Set property on msbuild file (*.csproj, *.props)")
+    public SetMSBuildPropertyCommand() : base("set-msbuild-property",
+        "Set property on msbuild file (*.csproj, *.props)")
     {
     }
 
@@ -14,17 +15,13 @@ public class SetMSBuildPropertyCommand : AbstractCommand<SetMSBuildPropertyComma
     {
         XDocument document = null;
         if (File.Exists(options.Input))
-        {
             using (var fileStream = PipelineUtils.OpenFile(options.Input))
             {
                 document = await XDocument.LoadAsync(fileStream, LoadOptions.None, cancellationToken);
             }
-        }
 
         if (document == null)
-        {
             document = XDocument.Parse("<Project>\r\n  <PropertyGroup>\r\n  </PropertyGroup>\r\n</Project>\r\n");
-        }
 
         var propertyGroupName = XName.Get("PropertyGroup", "");
         var propertyGroups = document.Descendants(propertyGroupName).ToList();
@@ -41,15 +38,11 @@ public class SetMSBuildPropertyCommand : AbstractCommand<SetMSBuildPropertyComma
             if (separatorIndex < 0)
                 throw new ArgumentException($"Invalid property format: {propertyKeyValue}");
 
-            var propertyValue = propertyKeyValue.Substring(separatorIndex+1);
+            var propertyValue = propertyKeyValue.Substring(separatorIndex + 1);
             var propertyName = XName.Get(propertyKeyValue.Substring(0, separatorIndex), "");
             foreach (var propertyGroup in propertyGroups)
-            {
-                foreach (var xElement in propertyGroup.Elements(propertyName).ToList())
-                {
-                    propertyGroups.Remove(xElement);
-                }
-            }
+            foreach (var xElement in propertyGroup.Elements(propertyName).ToList())
+                propertyGroups.Remove(xElement);
 
             propertyGroups[0].Add(new XElement(propertyName, new XText(propertyValue)));
         }
@@ -69,6 +62,6 @@ public class SetMSBuildPropertyCommand : AbstractCommand<SetMSBuildPropertyComma
         public string Input { get; set; }
 
         [CommandLineOption("-p", "Property to set")]
-        public List<string> Property { get; set; } = new List<string>();
+        public List<string> Property { get; set; } = new();
     }
 }

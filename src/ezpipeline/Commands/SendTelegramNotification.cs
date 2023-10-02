@@ -7,8 +7,12 @@ namespace AzurePipelineTool.Commands;
 
 public class SendTelegramNotification : AbstractCommand<SendTelegramNotification.Options>
 {
-    public SendTelegramNotification() : base("notify-telegram", "Send a notification message via Telegram Bot")
+    private readonly IPlatformEnvironment _environment;
+
+    public SendTelegramNotification(IPlatformEnvironment environment) : base("notify-telegram",
+        "Send a notification message via Telegram Bot")
     {
+        _environment = environment;
     }
 
 
@@ -24,7 +28,7 @@ public class SendTelegramNotification : AbstractCommand<SendTelegramNotification
                 if (groups.Key == null)
                     continue;
                 var firstMessage = groups.First();
-                Console.WriteLine(
+                _environment.WriteLine(
                     $"{firstMessage.Message.Chat.Title ?? "@" + firstMessage.Message.Chat.Username}: --chat-id {groups.Key}");
                 options.ChatId = groups.Key.Value.ToString(CultureInfo.InvariantCulture);
             }
@@ -32,7 +36,8 @@ public class SendTelegramNotification : AbstractCommand<SendTelegramNotification
 
         if (!string.IsNullOrWhiteSpace(options.ChatId) && !string.IsNullOrWhiteSpace(options.Message))
         {
-            var message = await telegramBot.SendTextMessageAsync(options.ChatId, options.Message, parseMode: options.ParseMode, cancellationToken: cancellationToken);
+            var message = await telegramBot.SendTextMessageAsync(options.ChatId, options.Message,
+                parseMode: options.ParseMode, cancellationToken: cancellationToken);
         }
     }
 

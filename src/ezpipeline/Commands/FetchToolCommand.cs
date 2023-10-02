@@ -6,6 +6,13 @@ namespace AzurePipelineTool.Commands;
 
 public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
 {
+    private readonly IPlatformEnvironment _environment;
+
+    public FetchToolCommand(IPlatformEnvironment environment) : base("fetch-tool", "Fetch tool (ninja, cmake, etc.)")
+    {
+        _environment = environment;
+    }
+
     public enum ToolName
     {
         None,
@@ -16,10 +23,6 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
         Clang,
         Gradle,
         Ninja
-    }
-
-    public FetchToolCommand() : base("fetch-tool", "Fetch tool (ninja, cmake, etc.)")
-    {
     }
 
     public override async Task HandleCommandAsync(Options options, CancellationToken cancellationToken)
@@ -52,7 +55,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
 
     private async Task FetchAndroidSDKManager(Options options, CancellationToken cancellationToken)
     {
-        var osVersionPlatform = PipelineUtils.GetPlatformId();
+        var osVersionPlatform = _environment.GetPlatformId();
 
         if (string.IsNullOrWhiteSpace(options.Version))
             options.Version = "10406996";
@@ -72,7 +75,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
         }
 
         var url = $"https://dl.google.com/android/repository/commandlinetools-{os}-{options.Version}_latest.zip";
-        await new UnzipUrlCommand().HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
+        await new UnzipUrlCommand(_environment).HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
         {
             Temp = options.Temp,
             Output = options.Output,
@@ -81,14 +84,15 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
             ArchiveType = ArchiveType.zip
         }, cancellationToken);
 
-        if (options.Path) PipelineUtils.PrepandPath("PATH", Path.GetFullPath(Path.Combine(options.Output, "cmdline-tools/bin/")));
+        if (options.Path)
+            _environment.PrepandPath("PATH", Path.GetFullPath(Path.Combine(options.Output, "cmdline-tools/bin/")));
     }
 
 
-    private static async Task FetchButler(Options options, CancellationToken cancellationToken)
+    private async Task FetchButler(Options options, CancellationToken cancellationToken)
     {
         var os = "windows";
-        switch (PipelineUtils.GetPlatformId())
+        switch (_environment.GetPlatformId())
         {
             case PlatformIdentifier.Windows:
                 os = "windows";
@@ -116,7 +120,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
             options.Version = "LATEST";
 
         var url = $"https://broth.itch.ovh/butler/{os}-{arch}/{options.Version}/archive/default";
-        await new UnzipUrlCommand().HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
+        await new UnzipUrlCommand(_environment).HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
         {
             Temp = options.Temp,
             Output = options.Output,
@@ -130,7 +134,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
             var unixFileInfo = new UnixFileInfo(Path.Combine(options.Output, "butler"));
             if (unixFileInfo.Exists)
             {
-                Console.WriteLine($"Making {unixFileInfo.Name} executable");
+                _environment.WriteLine($"Making {unixFileInfo.Name} executable");
                 unixFileInfo.FileAccessPermissions = unixFileInfo.FileAccessPermissions
                                                      | FileAccessPermissions.GroupExecute
                                                      | FileAccessPermissions.UserExecute
@@ -138,12 +142,12 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
             }
         }
 
-        if (options.Path) PipelineUtils.PrepandPath("PATH", Path.GetFullPath(options.Output));
+        if (options.Path) _environment.PrepandPath("PATH", Path.GetFullPath(options.Output));
     }
 
     private async Task FetchClang(Options options, CancellationToken cancellationToken)
     {
-        var osVersionPlatform = PipelineUtils.GetPlatformId();
+        var osVersionPlatform = _environment.GetPlatformId();
         var processArchitecture = RuntimeInformation.ProcessArchitecture;
 
         if (string.IsNullOrWhiteSpace(options.Version))
@@ -185,7 +189,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
                 break;
         }
 
-        await new UnzipUrlCommand().HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
+        await new UnzipUrlCommand(_environment).HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
         {
             Temp = options.Temp,
             Output = options.Output,
@@ -194,12 +198,12 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
             ArchiveType = ArchiveType.auto
         }, cancellationToken);
 
-        PipelineUtils.PrepandPath("PATH", Path.Combine(Path.GetFullPath(options.Output), "bin"));
+        _environment.PrepandPath("PATH", Path.Combine(Path.GetFullPath(options.Output), "bin"));
     }
 
     private async Task FetchCCache(Options options, CancellationToken cancellationToken)
     {
-        var osVersionPlatform = PipelineUtils.GetPlatformId();
+        var osVersionPlatform = _environment.GetPlatformId();
         osVersionPlatform = PlatformIdentifier.Linux;
         var processArchitecture = RuntimeInformation.ProcessArchitecture;
 
@@ -222,7 +226,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
 
         var url = $"https://github.com/ccache/ccache/releases/download/v{options.Version}/{fileName}";
 
-        await new UnzipUrlCommand().HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
+        await new UnzipUrlCommand(_environment).HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
         {
             Temp = options.Temp,
             Output = options.Output,
@@ -231,14 +235,14 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
             ArchiveType = ArchiveType.auto
         }, cancellationToken);
 
-        PipelineUtils.PrepandPath("PATH",
+        _environment.PrepandPath("PATH",
             Path.Combine(Path.GetFullPath(options.Output), Path.GetFileNameWithoutExtension(fileName)));
     }
 
     private async Task FetchCMake(Options options, CancellationToken cancellationToken)
     {
         var processArchitecture = RuntimeInformation.ProcessArchitecture;
-        var osVersionPlatform = PipelineUtils.GetPlatformId();
+        var osVersionPlatform = _environment.GetPlatformId();
 
         var arch = "i386";
         switch (processArchitecture)
@@ -280,7 +284,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
         var fileExt = archiveType == ArchiveType.zip ? "zip" : "tar.gz";
         var url =
             $"https://github.com/Kitware/CMake/releases/download/v{options.Version}/cmake-{options.Version}-{os}-{arch}.{fileExt}";
-        await new UnzipUrlCommand().HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
+        await new UnzipUrlCommand(_environment).HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
         {
             Temp = options.Temp,
             Output = options.Output,
@@ -292,24 +296,38 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
         if (options.Path)
         {
             if (osVersionPlatform == PlatformIdentifier.MacOSX)
-                PipelineUtils.PrepandPath("PATH",
+            {
+                _environment.PrepandPath("PATH",
                     Path.Combine(Path.GetFullPath(options.Output),
                         $"cmake-{options.Version}-{os}-{arch}/CMake.app/Contents/bin"));
+            }
+            else if (osVersionPlatform == PlatformIdentifier.Linux)
+            {
+                var pathOption = Path.Combine(Path.GetFullPath(options.Output),
+                    $"cmake-{options.Version}-Linux-{arch}/bin");
+                if (!Directory.Exists(pathOption))
+                    pathOption = Path.Combine(Path.GetFullPath(options.Output),
+                        $"cmake-{options.Version}-linux-{arch}/bin");
+
+                _environment.PrepandPath("PATH", pathOption);
+            }
             else
-                PipelineUtils.PrepandPath("PATH",
+            {
+                _environment.PrepandPath("PATH",
                     Path.Combine(Path.GetFullPath(options.Output), $"cmake-{options.Version}-{os}-{arch}/bin"));
+            }
         }
     }
 
     private async Task FetchGradle(Options options, CancellationToken cancellationToken)
     {
         var processArchitecture = RuntimeInformation.ProcessArchitecture;
-        var osVersionPlatform = PipelineUtils.GetPlatformId();
+        var osVersionPlatform = _environment.GetPlatformId();
 
         if (string.IsNullOrWhiteSpace(options.Version))
             options.Version = "8.3";
         var url = $"https://services.gradle.org/distributions/gradle-{options.Version}-bin.zip";
-        await new UnzipUrlCommand().HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
+        await new UnzipUrlCommand(_environment).HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
         {
             Temp = options.Temp,
             Output = options.Output,
@@ -320,9 +338,9 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
 
         if (options.Path)
         {
-            PipelineUtils.PrepandPath("PATH",
+            _environment.PrepandPath("PATH",
                 Path.Combine(Path.GetFullPath(options.Output), $"gradle-{options.Version}/bin"));
-            PipelineUtils.SetEnvironmentVariable("GRADLE_HOME",
+            _environment.SetEnvironmentVariable("GRADLE_HOME",
                 Path.Combine(Path.GetFullPath(options.Output), $"gradle-{options.Version}"));
         }
     }
@@ -330,7 +348,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
     private async Task FetchNinja(Options options, CancellationToken cancellationToken)
     {
         var os = "win";
-        switch (PipelineUtils.GetPlatformId())
+        switch (_environment.GetPlatformId())
         {
             case PlatformIdentifier.Windows:
                 os = "win";
@@ -346,7 +364,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
         if (string.IsNullOrWhiteSpace(options.Version))
             options.Version = "1.11.1";
         var url = $"https://github.com/ninja-build/ninja/releases/download/v{options.Version}/ninja-{os}.zip";
-        await new UnzipUrlCommand().HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
+        await new UnzipUrlCommand(_environment).HandleCommandAsync(new UnzipUrlCommand.UnzipUrlOptions
         {
             Temp = options.Temp,
             Output = options.Output,
@@ -354,7 +372,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
             Url = url
         }, cancellationToken);
 
-        if (options.Path) PipelineUtils.PrepandPath("PATH", Path.GetFullPath(options.Output));
+        if (options.Path) _environment.PrepandPath("PATH", Path.GetFullPath(options.Output));
     }
 
     public class Options
