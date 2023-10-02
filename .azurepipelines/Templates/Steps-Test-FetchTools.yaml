@@ -26,7 +26,8 @@ steps:
     displayName: Fetch CMake
 
   - bash: |
-      echo $PATH
+      echo "PATH=$PATH"
+      which cmake
       output=$(cmake --version)
       echo $output
       if [[ $output != "cmake version 3.19.7"* ]]; then
@@ -41,7 +42,8 @@ steps:
     displayName: Fetch CMake
 
   - bash: |
-      echo $PATH
+      echo "PATH=$PATH"
+      which cmake
       output=$(cmake --version)
       echo $output
       if [[ $output != "cmake version 3.27.6"* ]]; then
