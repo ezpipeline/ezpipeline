@@ -256,14 +256,7 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
                 arch = "i386";
                 break;
             case Architecture.X64:
-                if (parsedVersion != null && parsedVersion < Version.Parse("3.20.0") && osVersionPlatform == PlatformIdentifier.Windows)
-                {
-                    arch = "x64";
-                }
-                else
-                {
-                    arch = "x86_64";
-                }
+                arch = "x86_64";
                 break;
             case Architecture.Arm64:
                 arch = "arm64";
@@ -291,8 +284,11 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
                 break;
         }
 
-
-    
+        if (parsedVersion != null && parsedVersion < Version.Parse("3.20.0") && osVersionPlatform == PlatformIdentifier.Windows && processArchitecture == Architecture.X64)
+        {
+            arch = "x64";
+            os = "win64";
+        }
 
         var fileExt = archiveType == ArchiveType.zip ? "zip" : "tar.gz";
         var url =
