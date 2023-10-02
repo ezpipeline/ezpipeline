@@ -31,17 +31,17 @@ jobs:
     - name: Build Net7.0
       run: dotnet publish src/ezpipeline/ezpipeline.csproj -o nuget/tools/net7.0/any/ --no-restore -f net7.0
     - name: Fetch Butler
-      run: dotnet nuget/tools/net6.0/any/ezpipeline.dll fetch-tool -n Butler -o tools/ --path
+      run: dotnet nuget/tools/net7.0/any/ezpipeline.dll fetch-tool -n Butler -o tools/ --path
     - name: Test Butler
       run: butler help
 
     - name: Fetch Ninja
-      run: dotnet nuget/tools/net6.0/any/ezpipeline.dll fetch-tool -n Ninja -o tools/ --path
+      run: dotnet nuget/tools/net7.0/any/ezpipeline.dll fetch-tool -n Ninja -o tools/ --path
     - name: Test Ninja
       run: ninja --version
 
     - name: Fetch CMake 3.19.7
-      run: dotnet nuget/tools/net6.0/any/ezpipeline.dll fetch-tool -n CMake -o tools/ --path --version 3.19.7
+      run: dotnet nuget/tools/net7.0/any/ezpipeline.dll fetch-tool -n CMake -o tools/ --path --version 3.19.7
     - name: Test CMake 3.19.7
       run: |
         echo $PATH
@@ -52,7 +52,7 @@ jobs:
         fi
       shell: bash
     - name: Fetch CMake 3.27.6
-      run: dotnet nuget/tools/net6.0/any/ezpipeline.dll fetch-tool -n CMake -o tools/ --path --version 3.27.6
+      run: dotnet nuget/tools/net7.0/any/ezpipeline.dll fetch-tool -n CMake -o tools/ --path --version 3.27.6
     - name: Test CMake 3.27.6
       run: |
         echo $PATH
