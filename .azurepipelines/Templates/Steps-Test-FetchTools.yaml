@@ -59,7 +59,7 @@ steps:
       which gradle
       output=$(gradle --version)
       echo $output
-      if [[ $output != "Welcome to Gradle 6.5.1"* ]]; then
+      if [[ $output != *"Welcome to Gradle 6.5.1"* ]]; then
           exit 1
       fi
     workingDirectory: $(Build.SourcesDirectory)
