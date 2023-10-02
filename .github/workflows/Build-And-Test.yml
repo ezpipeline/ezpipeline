@@ -38,10 +38,17 @@ jobs:
     - name: Fetch Ninja
       run: dotnet nuget/tools/net7.0/any/ezpipeline.dll fetch-tool -n Ninja -o tools/ --path
     - name: Test Ninja
-      run: ninja --version
+      run: |
+        which ninja
+        ninja --version
+      shell: bash
 
     - name: Fetch CMake 3.19.7
       run: dotnet nuget/tools/net7.0/any/ezpipeline.dll fetch-tool -n CMake -o tools/ --path --version 3.19.7
+    - name: Test bin folder
+      run: ls -la
+      working-directory: /usr/share/dotnet:/home/runner/work/ezpipeline/ezpipeline/tools/cmake-3.19.7-Linux-x86_64/bin
+      shell: bash
     - name: Test CMake 3.19.7
       run: |
         echo "PATH=$PATH"
