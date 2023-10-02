@@ -244,6 +244,11 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
         var processArchitecture = RuntimeInformation.ProcessArchitecture;
         var osVersionPlatform = _environment.GetPlatformId();
 
+        if (string.IsNullOrWhiteSpace(options.Version))
+            options.Version = "3.24.3";
+
+        Version.TryParse(options.Version, result: out var parsedVersion);
+
         var arch = "i386";
         switch (processArchitecture)
         {
@@ -251,7 +256,14 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
                 arch = "i386";
                 break;
             case Architecture.X64:
-                arch = "x86_64";
+                if (parsedVersion != null && parsedVersion < Version.Parse("3.20.0") && osVersionPlatform == PlatformIdentifier.Windows)
+                {
+                    arch = "x64";
+                }
+                else
+                {
+                    arch = "x86_64";
+                }
                 break;
             case Architecture.Arm64:
                 arch = "arm64";
@@ -279,8 +291,9 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
                 break;
         }
 
-        if (string.IsNullOrWhiteSpace(options.Version))
-            options.Version = "3.24.3";
+
+    
+
         var fileExt = archiveType == ArchiveType.zip ? "zip" : "tar.gz";
         var url =
             $"https://github.com/Kitware/CMake/releases/download/v{options.Version}/cmake-{options.Version}-{os}-{arch}.{fileExt}";

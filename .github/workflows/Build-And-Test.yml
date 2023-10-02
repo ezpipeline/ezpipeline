@@ -20,10 +20,16 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
     - name: Restore dependencies
       run: dotnet restore src/ezpipeline.sln
-    - name: Build
-      run: dotnet publish src/ezpipeline/ezpipeline.csproj -o nuget/tools/net6.0/any/ --no-restore 
+    - name: Build Net6.0
+      run: dotnet publish src/ezpipeline/ezpipeline.csproj -o nuget/tools/net6.0/any/ --no-restore -f net6.0
+    - name: Build Net7.0
+      run: dotnet publish src/ezpipeline/ezpipeline.csproj -o nuget/tools/net7.0/any/ --no-restore -f net7.0
     - name: Fetch Butler
       run: dotnet nuget/tools/net6.0/any/ezpipeline.dll fetch-tool -n Butler -o tools/ --path
     - name: Test Butler
