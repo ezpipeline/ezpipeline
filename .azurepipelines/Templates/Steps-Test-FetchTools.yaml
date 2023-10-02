@@ -23,8 +23,7 @@ steps:
   - script: |
       dotnet ezpipeline.dll fetch-tool -n CMake -o $(Build.SourcesDirectory)/tools/ --path --version 3.19.7
     workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net7.0/any/
-    displayName: Fetch CMake
-
+    displayName: Fetch CMake 3.19.7
   - bash: |
       echo "PATH=$PATH"
       which cmake
@@ -39,8 +38,7 @@ steps:
   - script: |
       dotnet ezpipeline.dll fetch-tool -n CMake -o $(Build.SourcesDirectory)/tools/ --path --version 3.27.6
     workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net7.0/any/
-    displayName: Fetch CMake
-
+    displayName: Fetch CMake 3.27.6
   - bash: |
       echo "PATH=$PATH"
       which cmake
@@ -51,4 +49,19 @@ steps:
       fi
     workingDirectory: $(Build.SourcesDirectory)
     displayName: Run CMake 3.27.6
+
+  - script: |
+      dotnet ezpipeline.dll fetch-tool -n Gradle -o $(Build.SourcesDirectory)/tools/ --path --version 6.5.1
+    workingDirectory: $(Build.SourcesDirectory)/nuget/tools/net7.0/any/
+    displayName: Fetch Gradle 6.5.1
+  - bash: |
+      echo "PATH=$PATH"
+      which gradle
+      output=$(gradle --version)
+      echo $output
+      if [[ $output != "Welcome to Gradle 6.5.1"* ]]; then
+          exit 1
+      fi
+    workingDirectory: $(Build.SourcesDirectory)
+    displayName: Run Gradle 6.5.1
 

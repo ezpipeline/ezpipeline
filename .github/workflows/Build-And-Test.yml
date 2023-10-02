@@ -55,6 +55,7 @@ jobs:
             exit 1
         fi
       shell: bash
+
     - name: Fetch CMake 3.27.6
       run: dotnet nuget/tools/net7.0/any/ezpipeline.dll fetch-tool -n CMake -o tools/ --path --version 3.27.6
     - name: Test CMake 3.27.6
@@ -67,5 +68,17 @@ jobs:
             exit 1
         fi
       shell: bash
-
+      
+    - name: Fetch Gradle 6.5.1
+      run: dotnet nuget/tools/net7.0/any/ezpipeline.dll fetch-tool -n Gradle -o tools/ --path --version 6.5.1
+    - name: Test Gradle 6.5.1
+      run: |
+        echo "PATH=$PATH"
+        which gradle
+        output=$(gradle --version)
+        echo $output
+        if [[ $output != "Welcome to Gradle 6.5.1"* ]]; then
+            exit 1
+        fi
+      shell: bash
         
