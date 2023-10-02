@@ -44,6 +44,7 @@ jobs:
       run: dotnet nuget/tools/net6.0/any/ezpipeline.dll fetch-tool -n CMake -o tools/ --path --version 3.27.6
     - name: Test CMake 3.27.6
       run: |
+        echo $PATH
         output=$(cmake --version)
         echo $output
         if [[ $output != "cmake version 3.27.6"* ]]; then
@@ -54,6 +55,7 @@ jobs:
       run: dotnet nuget/tools/net6.0/any/ezpipeline.dll fetch-tool -n CMake -o tools/ --path --version 3.19.7
     - name: Test CMake 3.19.7
       run: |
+        echo $PATH
         output=$(cmake --version)
         echo $output
         if [[ $output != "cmake version 3.19.7"* ]]; then
