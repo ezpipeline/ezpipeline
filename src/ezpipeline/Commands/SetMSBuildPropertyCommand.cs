@@ -7,7 +7,7 @@ namespace AzurePipelineTool.Commands;
 public class SetMSBuildPropertyCommand : AbstractCommand<SetMSBuildPropertyCommand.Options>
 {
     public SetMSBuildPropertyCommand() : base("set-msbuild-property",
-        "Set property on msbuild file (*.csproj, *.props)")
+        "Set property in msbuild file (*.csproj, *.props)")
     {
     }
 

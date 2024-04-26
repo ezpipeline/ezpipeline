@@ -117,6 +117,12 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
                 break;
         }
 
+        //MacOSX only supports amd64
+        if (_environment.GetPlatformId() == PlatformIdentifier.MacOSX)
+        {
+            arch = "amd64";
+        }
+
         if (string.IsNullOrWhiteSpace(options.Version))
             options.Version = "LATEST";
 

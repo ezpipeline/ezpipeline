@@ -1,4 +1,5 @@
-﻿using PipelineTools;
+﻿using Discord;
+using PipelineTools;
 using Xunit;
 
 namespace ezpipeline;
@@ -13,4 +14,6 @@ public class PipelineUtilsTests
         var res = PipelineUtils.ResolvePath(input);
         Assert.Equal(expected, res);
     }
+
+
 }
