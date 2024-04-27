@@ -107,6 +107,11 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
         }
 
         var arch = "386";
+        if (_environment.GetPlatformId() == PlatformIdentifier.MacOSX)
+        {
+            arch = "amd64";
+        }
+
         switch (RuntimeInformation.ProcessArchitecture)
         {
             case Architecture.X86:
@@ -115,12 +120,6 @@ public class FetchToolCommand : AbstractCommand<FetchToolCommand.Options>
             case Architecture.X64:
                 arch = "amd64";
                 break;
-        }
-
-        //MacOSX only supports amd64
-        if (_environment.GetPlatformId() == PlatformIdentifier.MacOSX)
-        {
-            arch = "amd64";
         }
 
         if (string.IsNullOrWhiteSpace(options.Version))

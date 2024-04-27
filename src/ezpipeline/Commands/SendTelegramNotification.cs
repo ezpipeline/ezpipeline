@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using PipelineTools;
-using Telegram.Bot;
-using Telegram.Bot.Types.Enums;
+//using Telegram.Bot;
+//using Telegram.Bot.Types.Enums;
 
 namespace AzurePipelineTool.Commands;
 
@@ -18,27 +18,29 @@ public class SendTelegramNotification : AbstractCommand<SendTelegramNotification
 
     public override async Task HandleCommandAsync(Options options, CancellationToken cancellationToken)
     {
-        var telegramBot = new TelegramBotClient(new TelegramBotClientOptions(options.Token));
+        throw new NotImplementedException("Telegram.Bot.dll PUA classification with ESET problem https://github.com/TelegramBots/Telegram.Bot/issues/1354");
 
-        if (string.IsNullOrWhiteSpace(options.ChatId))
-        {
-            var updates = await telegramBot.GetUpdatesAsync(limit: 100, cancellationToken: cancellationToken);
-            foreach (var groups in updates.GroupBy(_ => _.Message?.Chat?.Id))
-            {
-                if (groups.Key == null)
-                    continue;
-                var firstMessage = groups.First();
-                _environment.WriteLine(
-                    $"{firstMessage.Message.Chat.Title ?? "@" + firstMessage.Message.Chat.Username}: --chat-id {groups.Key}");
-                options.ChatId = groups.Key.Value.ToString(CultureInfo.InvariantCulture);
-            }
-        }
+        //var telegramBot = new TelegramBotClient(new TelegramBotClientOptions(options.Token));
 
-        if (!string.IsNullOrWhiteSpace(options.ChatId) && !string.IsNullOrWhiteSpace(options.Message))
-        {
-            var message = await telegramBot.SendTextMessageAsync(options.ChatId, options.Message,
-                parseMode: options.ParseMode, cancellationToken: cancellationToken);
-        }
+        //if (string.IsNullOrWhiteSpace(options.ChatId))
+        //{
+        //    var updates = await telegramBot.GetUpdatesAsync(limit: 100, cancellationToken: cancellationToken);
+        //    foreach (var groups in updates.GroupBy(_ => _.Message?.Chat?.Id))
+        //    {
+        //        if (groups.Key == null)
+        //            continue;
+        //        var firstMessage = groups.First();
+        //        _environment.WriteLine(
+        //            $"{firstMessage.Message.Chat.Title ?? "@" + firstMessage.Message.Chat.Username}: --chat-id {groups.Key}");
+        //        options.ChatId = groups.Key.Value.ToString(CultureInfo.InvariantCulture);
+        //    }
+        //}
+
+        //if (!string.IsNullOrWhiteSpace(options.ChatId) && !string.IsNullOrWhiteSpace(options.Message))
+        //{
+        //    var message = await telegramBot.SendTextMessageAsync(options.ChatId, options.Message,
+        //        parseMode: options.ParseMode, cancellationToken: cancellationToken);
+        //}
     }
 
     public class Options
@@ -51,7 +53,7 @@ public class SendTelegramNotification : AbstractCommand<SendTelegramNotification
         [CommandLineOption("-m", "Text message")]
         public string? Message { get; set; }
 
-        [CommandLineOption(description: "Text message")]
-        public ParseMode ParseMode { get; set; } = ParseMode.MarkdownV2;
+        //[CommandLineOption(description: "Text message")]
+        //public ParseMode ParseMode { get; set; } = ParseMode.MarkdownV2;
     }
 }
