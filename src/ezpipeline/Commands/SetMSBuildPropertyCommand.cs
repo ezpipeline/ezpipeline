@@ -15,7 +15,7 @@ public class SetMSBuildPropertyCommand : AbstractCommand<SetMSBuildPropertyComma
     {
         XDocument document = null;
         if (File.Exists(options.Input))
-            using (var fileStream = PipelineUtils.OpenFile(options.Input))
+            await using (var fileStream = PipelineUtils.OpenFile(options.Input))
             {
                 document = await XDocument.LoadAsync(fileStream, LoadOptions.None, cancellationToken);
             }
